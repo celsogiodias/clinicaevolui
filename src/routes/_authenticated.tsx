@@ -1,10 +1,11 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
@@ -74,17 +75,8 @@ function AuthenticatedLayout() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-sidebar-primary/10 flex items-center justify-center overflow-hidden border border-sidebar-border">
-              {/* Substitua por <img src="/logo.png" /> quando enviar sua logomarca */}
-              <Activity className="w-6 h-6 text-sidebar-primary" />
-            </div>
-            <div>
-              <h1 className="font-bold text-base leading-tight">Gestão Clínica</h1>
-              <p className="text-xs text-sidebar-foreground/60">Painel</p>
-            </div>
-          </div>
+        <div className="p-4 border-b border-sidebar-border bg-white">
+          <img src={logo} alt="AtivaMente — visão integrativa" className="w-full h-auto max-h-28 object-contain" />
         </div>
 
         <nav className="p-4 space-y-1">
@@ -134,8 +126,7 @@ function AuthenticatedLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="lg:hidden flex items-center justify-between p-4 border-b bg-card sticky top-0 z-20">
           <div className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" />
-            <span className="font-semibold">Gestão Clínica</span>
+            <img src={logo} alt="AtivaMente" className="h-8 w-auto" />
           </div>
           <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
