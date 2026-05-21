@@ -41,7 +41,7 @@ function AuthenticatedLayout() {
         supabase.from("profiles").select("full_name, email").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id).order("role").limit(1).maybeSingle(),
       ]);
-      setProfile(profileData ?? { full_name: user.email, email: user.email });
+      setProfile(profileData ?? { full_name: user.email ?? null, email: user.email ?? null });
       setRole((roleData?.role as Role | undefined) ?? "administrativo");
     })();
   }, []);
