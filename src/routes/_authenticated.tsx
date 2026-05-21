@@ -75,17 +75,8 @@ function AuthenticatedLayout() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-sidebar-primary/10 flex items-center justify-center overflow-hidden border border-sidebar-border">
-              {/* Substitua por <img src="/logo.png" /> quando enviar sua logomarca */}
-              <Activity className="w-6 h-6 text-sidebar-primary" />
-            </div>
-            <div>
-              <h1 className="font-bold text-base leading-tight">Gestão Clínica</h1>
-              <p className="text-xs text-sidebar-foreground/60">Painel</p>
-            </div>
-          </div>
+        <div className="p-4 border-b border-sidebar-border bg-white">
+          <img src={logo} alt="AtivaMente — visão integrativa" className="w-full h-auto max-h-28 object-contain" />
         </div>
 
         <nav className="p-4 space-y-1">
