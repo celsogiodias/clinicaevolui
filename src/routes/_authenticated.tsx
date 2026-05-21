@@ -1,10 +1,11 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ location }) => {
