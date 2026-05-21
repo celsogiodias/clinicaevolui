@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Activity, Users, LayoutDashboard, LogOut, Menu, X } from "lucide-react";
+import { Activity, Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
@@ -53,9 +53,10 @@ function AuthenticatedLayout() {
   };
 
   const navItems = [
-    { to: "/dashboard", label: "Início", icon: LayoutDashboard },
-    { to: "/patients", label: "Pacientes", icon: Users },
-  ];
+    { to: "/dashboard", label: "Início", icon: LayoutDashboard, adminOnly: false },
+    { to: "/patients", label: "Pacientes", icon: Users, adminOnly: false },
+    { to: "/users", label: "Usuários", icon: ShieldCheck, adminOnly: true },
+  ].filter((i) => !i.adminOnly || role === "admin");
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -75,11 +76,12 @@ function AuthenticatedLayout() {
       >
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sidebar-primary/20 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-sidebar-primary" />
+            <div className="w-12 h-12 rounded-xl bg-sidebar-primary/10 flex items-center justify-center overflow-hidden border border-sidebar-border">
+              {/* Substitua por <img src="/logo.png" /> quando enviar sua logomarca */}
+              <Activity className="w-6 h-6 text-sidebar-primary" />
             </div>
             <div>
-              <h1 className="font-bold text-base">Gestão Clínica</h1>
+              <h1 className="font-bold text-base leading-tight">Gestão Clínica</h1>
               <p className="text-xs text-sidebar-foreground/60">Painel</p>
             </div>
           </div>
