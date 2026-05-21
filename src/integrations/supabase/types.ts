@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      medical_records: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string
+          id: string
+          patient_id: string
+          record_type: Database["public"]["Enums"]["record_type"]
+          scope: Database["public"]["Enums"]["record_scope"]
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          patient_id: string
+          record_type: Database["public"]["Enums"]["record_type"]
+          scope: Database["public"]["Enums"]["record_scope"]
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          patient_id?: string
+          record_type?: Database["public"]["Enums"]["record_type"]
+          scope?: Database["public"]["Enums"]["record_scope"]
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_team: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          patient_id: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_team_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patients: {
         Row: {
           birth_date: string | null
@@ -74,6 +153,47 @@ export type Database = {
         }
         Relationships: []
       }
+      record_attachments: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          id: string
+          mime_type: string | null
+          record_id: string
+          size_bytes: number | null
+          uploaded_by: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          id?: string
+          mime_type?: string | null
+          record_id: string
+          size_bytes?: number | null
+          uploaded_by: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          mime_type?: string | null
+          record_id?: string
+          size_bytes?: number | null
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "record_attachments_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "medical_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -100,6 +220,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_patient_team: {
+        Args: { _patient_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          role: Database["public"]["Enums"]["app_role"]
+          team_id: string
+          user_id: string
+        }[]
+      }
       get_users_with_roles: {
         Args: never
         Returns: {
@@ -109,6 +240,18 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }[]
+      }
+      has_any_patient_access: {
+        Args: { _patient_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_patient_access: {
+        Args: {
+          _patient_id: string
+          _scope: Database["public"]["Enums"]["record_scope"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       has_role: {
         Args: {
@@ -120,6 +263,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "psicologo" | "profissional" | "administrativo"
+      record_scope: "individual_psicologia" | "multidisciplinar"
+      record_type: "anamnese" | "evolucao" | "diagnostico" | "documento_cfp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -248,6 +393,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "psicologo", "profissional", "administrativo"],
+      record_scope: ["individual_psicologia", "multidisciplinar"],
+      record_type: ["anamnese", "evolucao", "diagnostico", "documento_cfp"],
     },
   },
 } as const
