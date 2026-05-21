@@ -53,9 +53,10 @@ function AuthenticatedLayout() {
   };
 
   const navItems = [
-    { to: "/dashboard", label: "Início", icon: LayoutDashboard },
-    { to: "/patients", label: "Pacientes", icon: Users },
-  ];
+    { to: "/dashboard", label: "Início", icon: LayoutDashboard, adminOnly: false },
+    { to: "/patients", label: "Pacientes", icon: Users, adminOnly: false },
+    { to: "/users", label: "Usuários", icon: ShieldCheck, adminOnly: true },
+  ].filter((i) => !i.adminOnly || role === "admin");
 
   return (
     <div className="min-h-screen bg-background flex">
