@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medical_records: {
         Row: {
           content: Json
@@ -263,6 +310,13 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "psicologo" | "profissional" | "administrativo"
+      appointment_status:
+        | "pendente"
+        | "confirmado"
+        | "nao_confirmado"
+        | "remarcado"
+        | "cancelado"
+        | "realizado"
       record_scope: "individual_psicologia" | "multidisciplinar"
       record_type: "anamnese" | "evolucao" | "diagnostico" | "documento_cfp"
     }
@@ -393,6 +447,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "psicologo", "profissional", "administrativo"],
+      appointment_status: [
+        "pendente",
+        "confirmado",
+        "nao_confirmado",
+        "remarcado",
+        "cancelado",
+        "realizado",
+      ],
       record_scope: ["individual_psicologia", "multidisciplinar"],
       record_type: ["anamnese", "evolucao", "diagnostico", "documento_cfp"],
     },
