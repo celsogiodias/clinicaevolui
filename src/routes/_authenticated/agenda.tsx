@@ -65,7 +65,7 @@ function AgendaPage() {
 
   const load = async () => {
     setLoading(true);
-    const [{ data: apps }, { data: pats }, { data: roles }] = await Promise.all([
+    const [{ data: apps }, { data: pats }, { data: profs }] = await Promise.all([
       supabase
         .from("appointments")
         .select("*")
@@ -73,20 +73,11 @@ function AgendaPage() {
         .lt("starts_at", weekEnd.toISOString())
         .order("starts_at"),
       supabase.from("patients").select("id, full_name").order("full_name"),
-      supabase.from("user_roles").select("user_id, role").in("role", ["admin", "psicologo", "profissional"]),
+      supabase.rpc("get_professionals_for_agenda"),
     ]);
     setAppointments((apps as Appointment[] | null) ?? []);
     setPatients((pats as PatientRow[] | null) ?? []);
-
-    const roleRows = (roles as { user_id: string; role: string }[] | null) ?? [];
-    const userIds = roleRows.map((r) => r.user_id);
-    let profRows: { id: string; full_name: string | null }[] = [];
-    if (userIds.length > 0) {
-      const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", userIds);
-      profRows = (profs as { id: string; full_name: string | null }[] | null) ?? [];
-    }
-    const map = new Map(profRows.map((p) => [p.id, p.full_name]));
-    setProfessionals(roleRows.map((r) => ({ user_id: r.user_id, full_name: map.get(r.user_id) ?? null, role: r.role })));
+    setProfessionals(((profs as ProfRow[] | null) ?? []));
     setLoading(false);
   };
 
