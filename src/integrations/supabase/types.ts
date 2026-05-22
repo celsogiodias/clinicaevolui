@@ -278,6 +278,14 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_professionals_for_agenda: {
+        Args: never
+        Returns: {
+          full_name: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
       get_users_with_roles: {
         Args: never
         Returns: {
