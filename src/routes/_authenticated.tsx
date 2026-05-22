@@ -55,6 +55,7 @@ function AuthenticatedLayout() {
 
   const navItems = [
     { to: "/dashboard", label: "Início", icon: LayoutDashboard, adminOnly: false },
+    { to: "/agenda", label: "Agenda", icon: Calendar, adminOnly: false },
     { to: "/patients", label: "Pacientes", icon: Users, adminOnly: false },
     { to: "/users", label: "Usuários", icon: ShieldCheck, adminOnly: true },
   ].filter((i) => !i.adminOnly || role === "admin");
