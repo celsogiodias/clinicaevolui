@@ -153,6 +153,44 @@ function AgendaPage() {
         ))}
       </div>
 
+      {/* Filtros */}
+      <div className="flex flex-wrap items-end gap-3 p-3 rounded-lg border bg-card">
+        <div className="min-w-[200px]">
+          <Label className="text-xs">Profissional</Label>
+          <Select value={filterProf} onValueChange={setFilterProf}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {professionals.map((p) => (
+                <SelectItem key={p.user_id} value={p.user_id}>{p.full_name ?? p.user_id}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="min-w-[200px]">
+          <Label className="text-xs">Status</Label>
+          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as Status | "all")}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {(Object.keys(statusMeta) as Status[]).map((s) => (
+                <SelectItem key={s} value={s}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${statusMeta[s].dot}`} />
+                    {statusMeta[s].label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {(filterProf !== "all" || filterStatus !== "all") && (
+          <Button variant="ghost" size="sm" onClick={() => { setFilterProf("all"); setFilterStatus("all"); }}>
+            Limpar filtros
+          </Button>
+        )}
+      </div>
+
       <div className="text-sm font-medium text-muted-foreground">
         Semana de {weekStart.toLocaleDateString("pt-BR")} a {addDays(weekStart, 6).toLocaleDateString("pt-BR")}
       </div>
