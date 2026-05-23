@@ -61,6 +61,57 @@ export type Database = {
           },
         ]
       }
+      financial_entries: {
+        Row: {
+          amount: number
+          appointment_id: string | null
+          created_at: string
+          created_by: string
+          description: string
+          entry_date: string
+          id: string
+          method: Database["public"]["Enums"]["payment_method"] | null
+          notes: string | null
+          paid_at: string | null
+          patient_id: string
+          professional_id: string
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_id?: string | null
+          created_at?: string
+          created_by: string
+          description: string
+          entry_date?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"] | null
+          notes?: string | null
+          paid_at?: string | null
+          patient_id: string
+          professional_id: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string
+          entry_date?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payment_method"] | null
+          notes?: string | null
+          paid_at?: string | null
+          patient_id?: string
+          professional_id?: string
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       medical_records: {
         Row: {
           content: Json
@@ -325,6 +376,14 @@ export type Database = {
         | "remarcado"
         | "cancelado"
         | "realizado"
+      payment_method:
+        | "dinheiro"
+        | "pix"
+        | "cartao"
+        | "transferencia"
+        | "convenio"
+        | "outro"
+      payment_status: "pendente" | "pago" | "cancelado"
       record_scope: "individual_psicologia" | "multidisciplinar"
       record_type: "anamnese" | "evolucao" | "diagnostico" | "documento_cfp"
     }
@@ -463,6 +522,15 @@ export const Constants = {
         "cancelado",
         "realizado",
       ],
+      payment_method: [
+        "dinheiro",
+        "pix",
+        "cartao",
+        "transferencia",
+        "convenio",
+        "outro",
+      ],
+      payment_status: ["pendente", "pago", "cancelado"],
       record_scope: ["individual_psicologia", "multidisciplinar"],
       record_type: ["anamnese", "evolucao", "diagnostico", "documento_cfp"],
     },
