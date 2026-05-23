@@ -60,6 +60,8 @@ function AgendaPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filterProf, setFilterProf] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
 
   const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart]);
 
