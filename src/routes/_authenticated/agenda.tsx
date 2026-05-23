@@ -60,6 +60,8 @@ function AgendaPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Appointment | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [filterProf, setFilterProf] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
 
   const weekEnd = useMemo(() => addDays(weekStart, 7), [weekStart]);
 
@@ -97,8 +99,13 @@ function AgendaPage() {
   };
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const filtered = appointments.filter((a) => {
+    if (filterProf !== "all" && a.professional_id !== filterProf) return false;
+    if (filterStatus !== "all" && a.status !== filterStatus) return false;
+    return true;
+  });
   const appsByDay = (d: Date) =>
-    appointments
+    filtered
       .filter((a) => {
         const s = new Date(a.starts_at);
         return s.getFullYear() === d.getFullYear() && s.getMonth() === d.getMonth() && s.getDate() === d.getDate();
@@ -144,6 +151,44 @@ function AgendaPage() {
             {statusMeta[s].label}
           </span>
         ))}
+      </div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap items-end gap-3 p-3 rounded-lg border bg-card">
+        <div className="min-w-[200px]">
+          <Label className="text-xs">Profissional</Label>
+          <Select value={filterProf} onValueChange={setFilterProf}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {professionals.map((p) => (
+                <SelectItem key={p.user_id} value={p.user_id}>{p.full_name ?? p.user_id}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="min-w-[200px]">
+          <Label className="text-xs">Status</Label>
+          <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as Status | "all")}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {(Object.keys(statusMeta) as Status[]).map((s) => (
+                <SelectItem key={s} value={s}>
+                  <span className="inline-flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${statusMeta[s].dot}`} />
+                    {statusMeta[s].label}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        {(filterProf !== "all" || filterStatus !== "all") && (
+          <Button variant="ghost" size="sm" onClick={() => { setFilterProf("all"); setFilterStatus("all"); }}>
+            Limpar filtros
+          </Button>
+        )}
       </div>
 
       <div className="text-sm font-medium text-muted-foreground">
