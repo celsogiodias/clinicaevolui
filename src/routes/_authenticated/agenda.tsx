@@ -99,8 +99,13 @@ function AgendaPage() {
   };
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const filtered = appointments.filter((a) => {
+    if (filterProf !== "all" && a.professional_id !== filterProf) return false;
+    if (filterStatus !== "all" && a.status !== filterStatus) return false;
+    return true;
+  });
   const appsByDay = (d: Date) =>
-    appointments
+    filtered
       .filter((a) => {
         const s = new Date(a.starts_at);
         return s.getFullYear() === d.getFullYear() && s.getMonth() === d.getMonth() && s.getDate() === d.getDate();
