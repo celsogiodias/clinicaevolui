@@ -133,6 +133,10 @@ function EditPatient() {
             />
           </TabsContent>
         )}
+
+        <TabsContent value="financ" className="mt-6">
+          <FinancialTab patientId={id} />
+        </TabsContent>
       </Tabs>
     </div>
   );
