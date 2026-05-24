@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt } from "lucide-react";
+import { exportEntriesToCSV, exportEntriesToPDF, generateReceiptPDF, type ExportEntry } from "@/lib/financialExport";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
