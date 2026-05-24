@@ -9,6 +9,7 @@ import { usePatientAccess } from "@/lib/usePatientAccess";
 import { PatientTeamTab } from "@/components/patient/PatientTeamTab";
 import { MedicalRecordsTab } from "@/components/patient/MedicalRecordsTab";
 import { AttachmentsTab } from "@/components/patient/AttachmentsTab";
+import { FinancialTab } from "@/components/patient/FinancialTab";
 
 export const Route = createFileRoute("/_authenticated/patients/$id")({
   component: EditPatient,
