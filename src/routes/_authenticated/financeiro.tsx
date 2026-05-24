@@ -322,8 +322,11 @@ function FinanceiroPage() {
                         </span>
                       </td>
                       <td className="p-3 text-right whitespace-nowrap">
-                        {e.status !== "pago" && (
+                        {e.status === "pendente" && (
                           <Button size="sm" variant="ghost" className="text-green-700" onClick={() => quickStatus(e, "pago")}>Pagar</Button>
+                        )}
+                        {e.status === "pago" && (
+                          <Button size="sm" variant="ghost" title="Recibo" onClick={() => issueReceipt(e)}><Receipt className="w-4 h-4" /></Button>
                         )}
                         <Button size="sm" variant="ghost" onClick={() => openEdit(e)}><Pencil className="w-4 h-4" /></Button>
                         <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
