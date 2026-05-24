@@ -172,10 +172,55 @@ function FinanceiroPage() {
     toast.success("Lançamento excluído"); load();
   };
 
+  const buildExportEntries = (): ExportEntry[] =>
+    filtered.map((e) => ({
+      entry_date: e.entry_date,
+      patient_name: patientName(e.patient_id),
+      professional_name: profName(e.professional_id),
+      description: e.description,
+      amount: Number(e.amount),
+      method: e.method,
+      status: e.status,
+      paid_at: e.paid_at,
+    }));
+
+  const onExportCSV = () => {
+    if (filtered.length === 0) return toast.info("Nenhum lançamento para exportar");
+    exportEntriesToCSV(buildExportEntries(), `financeiro_${from}_a_${to}.csv`);
+  };
+  const onExportPDF = async () => {
+    if (filtered.length === 0) return toast.info("Nenhum lançamento para exportar");
+    try {
+      await exportEntriesToPDF(buildExportEntries(), { periodFrom: from, periodTo: to, totals }, `financeiro_${from}_a_${to}.pdf`);
+    } catch (e: any) { toast.error("Erro ao gerar PDF: " + e.message); }
+  };
+
+  const issueReceipt = async (e: Entry) => {
+    try {
+      await generateReceiptPDF({
+        patientName: patientName(e.patient_id),
+        professionalName: profName(e.professional_id),
+        description: e.description,
+        amount: Number(e.amount),
+        method: e.method,
+        paidAt: e.paid_at ? new Date(e.paid_at) : new Date(),
+        entryDate: e.entry_date,
+        receiptNumber: e.id.slice(0, 8).toUpperCase(),
+      });
+    } catch (err: any) { toast.error("Erro ao gerar recibo: " + err.message); }
+  };
+
   const quickStatus = async (e: Entry, s: Status) => {
-    const { error } = await supabase.from("financial_entries").update({ status: s }).eq("id", e.id);
+    if (e.status === "cancelado" && s === "pago") {
+      return toast.error("Lançamento cancelado não pode ser pago. Altere para pendente primeiro.");
+    }
+    const { data, error } = await supabase.from("financial_entries").update({ status: s }).eq("id", e.id).select().single();
     if (error) return toast.error(error.message);
-    toast.success("Status atualizado"); load();
+    toast.success("Status atualizado");
+    if (s === "pago" && data) {
+      await issueReceipt(data as Entry);
+    }
+    load();
   };
 
   const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
