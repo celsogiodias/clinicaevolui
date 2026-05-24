@@ -83,6 +83,7 @@ function EditPatient() {
           {access.canSeeIndividual && <TabsTrigger value="psico">Prontuário Psicologia</TabsTrigger>}
           {access.canSeeMulti && <TabsTrigger value="multi">Prontuário Multi</TabsTrigger>}
           {access.canSeeProntuario && <TabsTrigger value="docs">Documentos anexos</TabsTrigger>}
+          <TabsTrigger value="financ">Financeiro</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dados" className="mt-6 max-w-2xl">
