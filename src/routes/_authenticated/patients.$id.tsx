@@ -9,6 +9,7 @@ import { usePatientAccess } from "@/lib/usePatientAccess";
 import { PatientTeamTab } from "@/components/patient/PatientTeamTab";
 import { MedicalRecordsTab } from "@/components/patient/MedicalRecordsTab";
 import { AttachmentsTab } from "@/components/patient/AttachmentsTab";
+import { FinancialTab } from "@/components/patient/FinancialTab";
 
 export const Route = createFileRoute("/_authenticated/patients/$id")({
   component: EditPatient,
@@ -82,6 +83,7 @@ function EditPatient() {
           {access.canSeeIndividual && <TabsTrigger value="psico">Prontuário Psicologia</TabsTrigger>}
           {access.canSeeMulti && <TabsTrigger value="multi">Prontuário Multi</TabsTrigger>}
           {access.canSeeProntuario && <TabsTrigger value="docs">Documentos anexos</TabsTrigger>}
+          <TabsTrigger value="financ">Financeiro</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dados" className="mt-6 max-w-2xl">
@@ -131,6 +133,10 @@ function EditPatient() {
             />
           </TabsContent>
         )}
+
+        <TabsContent value="financ" className="mt-6">
+          <FinancialTab patientId={id} />
+        </TabsContent>
       </Tabs>
     </div>
   );

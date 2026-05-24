@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt } from "lucide-react";
+import { exportEntriesToCSV, exportEntriesToPDF, generateReceiptPDF, type ExportEntry } from "@/lib/financialExport";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
@@ -171,10 +172,55 @@ function FinanceiroPage() {
     toast.success("Lançamento excluído"); load();
   };
 
+  const buildExportEntries = (): ExportEntry[] =>
+    filtered.map((e) => ({
+      entry_date: e.entry_date,
+      patient_name: patientName(e.patient_id),
+      professional_name: profName(e.professional_id),
+      description: e.description,
+      amount: Number(e.amount),
+      method: e.method,
+      status: e.status,
+      paid_at: e.paid_at,
+    }));
+
+  const onExportCSV = () => {
+    if (filtered.length === 0) return toast.info("Nenhum lançamento para exportar");
+    exportEntriesToCSV(buildExportEntries(), `financeiro_${from}_a_${to}.csv`);
+  };
+  const onExportPDF = async () => {
+    if (filtered.length === 0) return toast.info("Nenhum lançamento para exportar");
+    try {
+      await exportEntriesToPDF(buildExportEntries(), { periodFrom: from, periodTo: to, totals }, `financeiro_${from}_a_${to}.pdf`);
+    } catch (e: any) { toast.error("Erro ao gerar PDF: " + e.message); }
+  };
+
+  const issueReceipt = async (e: Entry) => {
+    try {
+      await generateReceiptPDF({
+        patientName: patientName(e.patient_id),
+        professionalName: profName(e.professional_id),
+        description: e.description,
+        amount: Number(e.amount),
+        method: e.method,
+        paidAt: e.paid_at ? new Date(e.paid_at) : new Date(),
+        entryDate: e.entry_date,
+        receiptNumber: e.id.slice(0, 8).toUpperCase(),
+      });
+    } catch (err: any) { toast.error("Erro ao gerar recibo: " + err.message); }
+  };
+
   const quickStatus = async (e: Entry, s: Status) => {
-    const { error } = await supabase.from("financial_entries").update({ status: s }).eq("id", e.id);
+    if (e.status === "cancelado" && s === "pago") {
+      return toast.error("Lançamento cancelado não pode ser pago. Altere para pendente primeiro.");
+    }
+    const { data, error } = await supabase.from("financial_entries").update({ status: s }).eq("id", e.id).select().single();
     if (error) return toast.error(error.message);
-    toast.success("Status atualizado"); load();
+    toast.success("Status atualizado");
+    if (s === "pago" && data) {
+      await issueReceipt(data as Entry);
+    }
+    load();
   };
 
   const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
@@ -190,7 +236,11 @@ function FinanceiroPage() {
             {canSeeAll ? "Todos os lançamentos da clínica" : "Seus lançamentos"}
           </p>
         </div>
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-2" /> Novo lançamento</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onExportCSV}><FileSpreadsheet className="w-4 h-4 mr-2" /> CSV</Button>
+          <Button variant="outline" onClick={onExportPDF}><FileDown className="w-4 h-4 mr-2" /> PDF</Button>
+          <Button onClick={openNew}><Plus className="w-4 h-4 mr-2" /> Novo lançamento</Button>
+        </div>
       </div>
 
       {/* Cards */}
@@ -272,8 +322,11 @@ function FinanceiroPage() {
                         </span>
                       </td>
                       <td className="p-3 text-right whitespace-nowrap">
-                        {e.status !== "pago" && (
+                        {e.status === "pendente" && (
                           <Button size="sm" variant="ghost" className="text-green-700" onClick={() => quickStatus(e, "pago")}>Pagar</Button>
+                        )}
+                        {e.status === "pago" && (
+                          <Button size="sm" variant="ghost" title="Recibo" onClick={() => issueReceipt(e)}><Receipt className="w-4 h-4" /></Button>
                         )}
                         <Button size="sm" variant="ghost" onClick={() => openEdit(e)}><Pencil className="w-4 h-4" /></Button>
                         <Button size="sm" variant="ghost" className="text-destructive" onClick={() => remove(e.id)}><Trash2 className="w-4 h-4" /></Button>
