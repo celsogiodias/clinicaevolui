@@ -236,7 +236,11 @@ function FinanceiroPage() {
             {canSeeAll ? "Todos os lançamentos da clínica" : "Seus lançamentos"}
           </p>
         </div>
-        <Button onClick={openNew}><Plus className="w-4 h-4 mr-2" /> Novo lançamento</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={onExportCSV}><FileSpreadsheet className="w-4 h-4 mr-2" /> CSV</Button>
+          <Button variant="outline" onClick={onExportPDF}><FileDown className="w-4 h-4 mr-2" /> PDF</Button>
+          <Button onClick={openNew}><Plus className="w-4 h-4 mr-2" /> Novo lançamento</Button>
+        </div>
       </div>
 
       {/* Cards */}
