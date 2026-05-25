@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
