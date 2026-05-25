@@ -16,8 +16,8 @@ interface Reminder {
   starts_at: string;
   ends_at: string;
   status: string;
+  professional_id: string;
   patient: { id: string; full_name: string; phone: string | null } | null;
-  professional_name: string | null;
   reminder_24h_sent_at: string | null;
   reminder_2h_sent_at: string | null;
 }
