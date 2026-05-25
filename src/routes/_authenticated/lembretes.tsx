@@ -144,10 +144,13 @@ function LembretesPage() {
   };
 
   const markSent = async (r: Reminder, window: Window) => {
-    const field = window === "24h" ? "reminder_24h_sent_at" : "reminder_2h_sent_at";
+    const now = new Date().toISOString();
+    const payload = window === "24h"
+      ? { reminder_24h_sent_at: now }
+      : { reminder_2h_sent_at: now };
     const { error } = await supabase
       .from("appointments")
-      .update({ [field]: new Date().toISOString() })
+      .update(payload)
       .eq("id", r.id);
     if (error) {
       toast.error("Erro: " + error.message);
