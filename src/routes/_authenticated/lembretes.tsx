@@ -98,8 +98,8 @@ function LembretesPage() {
       starts_at: a.starts_at,
       ends_at: a.ends_at,
       status: a.status,
+      professional_id: a.professional_id,
       patient: a.patient,
-      professional_name: null,
       reminder_24h_sent_at: a.reminder_24h_sent_at,
       reminder_2h_sent_at: a.reminder_2h_sent_at,
     }));
