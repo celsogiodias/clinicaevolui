@@ -23,6 +23,8 @@ export type Database = {
           notes: string | null
           patient_id: string
           professional_id: string
+          reminder_24h_sent_at: string | null
+          reminder_2h_sent_at: string | null
           starts_at: string
           status: Database["public"]["Enums"]["appointment_status"]
           updated_at: string
@@ -35,6 +37,8 @@ export type Database = {
           notes?: string | null
           patient_id: string
           professional_id: string
+          reminder_24h_sent_at?: string | null
+          reminder_2h_sent_at?: string | null
           starts_at: string
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
@@ -47,6 +51,8 @@ export type Database = {
           notes?: string | null
           patient_id?: string
           professional_id?: string
+          reminder_24h_sent_at?: string | null
+          reminder_2h_sent_at?: string | null
           starts_at?: string
           status?: Database["public"]["Enums"]["appointment_status"]
           updated_at?: string
