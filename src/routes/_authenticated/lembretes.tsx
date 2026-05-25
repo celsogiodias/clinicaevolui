@@ -159,10 +159,7 @@ function LembretesPage() {
   const renderRow = (r: Reminder, window: Window) => {
     const sent = window === "24h" ? r.reminder_24h_sent_at : r.reminder_2h_sent_at;
     const hasPhone = !!normalizePhone(r.patient?.phone ?? null);
-    const profName = (() => {
-      const pid = (r as any).professional_id;
-      return pid ? profMap[pid] : null;
-    })();
+    const profName = profMap[r.professional_id] ?? null;
     return (
       <Card key={`${r.id}-${window}`} className="p-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
