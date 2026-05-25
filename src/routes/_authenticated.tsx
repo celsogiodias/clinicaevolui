@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
@@ -56,6 +56,7 @@ function AuthenticatedLayout() {
   const navItems = [
     { to: "/dashboard", label: "Início", icon: LayoutDashboard, adminOnly: false },
     { to: "/agenda", label: "Agenda", icon: Calendar, adminOnly: false },
+    { to: "/lembretes", label: "Lembretes", icon: Bell, adminOnly: false },
     { to: "/patients", label: "Pacientes", icon: Users, adminOnly: false },
     { to: "/financeiro", label: "Financeiro", icon: DollarSign, adminOnly: false },
     { to: "/users", label: "Usuários", icon: ShieldCheck, adminOnly: true },
