@@ -133,13 +133,9 @@ function LembretesPage() {
       toast.error("Paciente sem telefone cadastrado");
       return;
     }
-    const prof = profMap[ (r as any).professional_id ?? "" ] ?? null;
+    const prof = profMap[r.professional_id] ?? null;
     const msg = buildMessage(r.patient.full_name, r.starts_at, prof, window);
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window === "24h"
-      ? null
-      : null;
-    // Abre WhatsApp
     globalThis.open(url, "_blank", "noopener,noreferrer");
   };
 
