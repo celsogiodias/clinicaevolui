@@ -13,8 +13,10 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
+import { Route as AuthenticatedMeuPerfilRouteImport } from './routes/_authenticated/meu-perfil'
 import { Route as AuthenticatedLembretesRouteImport } from './routes/_authenticated/lembretes'
 import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authenticated/financeiro'
+import { Route as AuthenticatedEspecialidadesRouteImport } from './routes/_authenticated/especialidades'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
 import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authenticated/patients.index'
@@ -40,6 +42,11 @@ const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedMeuPerfilRoute = AuthenticatedMeuPerfilRouteImport.update({
+  id: '/meu-perfil',
+  path: '/meu-perfil',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedLembretesRoute = AuthenticatedLembretesRouteImport.update({
   id: '/lembretes',
   path: '/lembretes',
@@ -50,6 +57,12 @@ const AuthenticatedFinanceiroRoute = AuthenticatedFinanceiroRouteImport.update({
   path: '/financeiro',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEspecialidadesRoute =
+  AuthenticatedEspecialidadesRouteImport.update({
+    id: '/especialidades',
+    path: '/especialidades',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -83,8 +96,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/especialidades': typeof AuthenticatedEspecialidadesRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/users': typeof AuthenticatedUsersRoute
   '/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/patients/new': typeof AuthenticatedPatientsNewRoute
@@ -95,8 +110,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/agenda': typeof AuthenticatedAgendaRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/especialidades': typeof AuthenticatedEspecialidadesRoute
   '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/lembretes': typeof AuthenticatedLembretesRoute
+  '/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/users': typeof AuthenticatedUsersRoute
   '/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/patients/new': typeof AuthenticatedPatientsNewRoute
@@ -109,8 +126,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/especialidades': typeof AuthenticatedEspecialidadesRoute
   '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/lembretes': typeof AuthenticatedLembretesRoute
+  '/_authenticated/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
   '/_authenticated/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/_authenticated/patients/new': typeof AuthenticatedPatientsNewRoute
@@ -123,8 +142,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/agenda'
     | '/dashboard'
+    | '/especialidades'
     | '/financeiro'
     | '/lembretes'
+    | '/meu-perfil'
     | '/users'
     | '/patients/$id'
     | '/patients/new'
@@ -135,8 +156,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/agenda'
     | '/dashboard'
+    | '/especialidades'
     | '/financeiro'
     | '/lembretes'
+    | '/meu-perfil'
     | '/users'
     | '/patients/$id'
     | '/patients/new'
@@ -148,8 +171,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/agenda'
     | '/_authenticated/dashboard'
+    | '/_authenticated/especialidades'
     | '/_authenticated/financeiro'
     | '/_authenticated/lembretes'
+    | '/_authenticated/meu-perfil'
     | '/_authenticated/users'
     | '/_authenticated/patients/$id'
     | '/_authenticated/patients/new'
@@ -192,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsersRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/meu-perfil': {
+      id: '/_authenticated/meu-perfil'
+      path: '/meu-perfil'
+      fullPath: '/meu-perfil'
+      preLoaderRoute: typeof AuthenticatedMeuPerfilRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/lembretes': {
       id: '/_authenticated/lembretes'
       path: '/lembretes'
@@ -204,6 +236,13 @@ declare module '@tanstack/react-router' {
       path: '/financeiro'
       fullPath: '/financeiro'
       preLoaderRoute: typeof AuthenticatedFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/especialidades': {
+      id: '/_authenticated/especialidades'
+      path: '/especialidades'
+      fullPath: '/especialidades'
+      preLoaderRoute: typeof AuthenticatedEspecialidadesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/dashboard': {
@@ -247,8 +286,10 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedEspecialidadesRoute: typeof AuthenticatedEspecialidadesRoute
   AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedLembretesRoute: typeof AuthenticatedLembretesRoute
+  AuthenticatedMeuPerfilRoute: typeof AuthenticatedMeuPerfilRoute
   AuthenticatedUsersRoute: typeof AuthenticatedUsersRoute
   AuthenticatedPatientsIdRoute: typeof AuthenticatedPatientsIdRoute
   AuthenticatedPatientsNewRoute: typeof AuthenticatedPatientsNewRoute
@@ -258,8 +299,10 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEspecialidadesRoute: AuthenticatedEspecialidadesRoute,
   AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedLembretesRoute: AuthenticatedLembretesRoute,
+  AuthenticatedMeuPerfilRoute: AuthenticatedMeuPerfilRoute,
   AuthenticatedUsersRoute: AuthenticatedUsersRoute,
   AuthenticatedPatientsIdRoute: AuthenticatedPatientsIdRoute,
   AuthenticatedPatientsNewRoute: AuthenticatedPatientsNewRoute,
@@ -278,3 +321,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
