@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { RecordEditor, type RecordDraft } from "./RecordEditor";
 import { recordTypeLabels, type RecordType } from "@/lib/recordTemplates";
 import { exportRecordToPDF } from "@/lib/pdfExport";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { EvolutionAnalysis } from "./EvolutionAnalysis";
 
 type Scope = "individual_psicologia" | "multidisciplinar";
 
