@@ -126,9 +126,23 @@ export function MedicalRecordsTab({ patientId, patientName, scope, isAdmin }: Pr
       patientName,
       body: r.content?.body ?? "",
       author: r.author_name,
+      authorId: r.created_by,
       date: new Date(r.created_at).toLocaleString("pt-BR"),
     });
   };
+
+  // Agrupa por record_type quando for prontuário individual
+  const grouped = useMemo(() => {
+    const map = new Map<RecordType, Record[]>();
+    for (const r of records) {
+      const arr = map.get(r.record_type) ?? [];
+      arr.push(r);
+      map.set(r.record_type, arr);
+    }
+    return map;
+  }, [records]);
+
+  const groupOrder: RecordType[] = ["anamnese", "diagnostico", "evolucao", "documento_cfp"];
 
   return (
     <div className="space-y-4">
