@@ -1,6 +1,6 @@
 import { createFileRoute, redirect, Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign, Bell } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, Menu, X, ShieldCheck, Calendar, DollarSign, Bell, Briefcase, UserCog } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getSession } from "@/lib/auth";
 import { toast } from "sonner";
@@ -59,7 +59,9 @@ function AuthenticatedLayout() {
     { to: "/lembretes", label: "Lembretes", icon: Bell, adminOnly: false },
     { to: "/patients", label: "Pacientes", icon: Users, adminOnly: false },
     { to: "/financeiro", label: "Financeiro", icon: DollarSign, adminOnly: false },
+    { to: "/meu-perfil", label: "Meu perfil", icon: UserCog, adminOnly: false },
     { to: "/users", label: "Usuários", icon: ShieldCheck, adminOnly: true },
+    { to: "/especialidades", label: "Especialidades", icon: Briefcase, adminOnly: true },
   ].filter((i) => !i.adminOnly || role === "admin");
 
   return (

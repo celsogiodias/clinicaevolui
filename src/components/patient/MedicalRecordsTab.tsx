@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { RecordEditor, type RecordDraft } from "./RecordEditor";
 import { recordTypeLabels, type RecordType } from "@/lib/recordTemplates";
 import { exportRecordToPDF } from "@/lib/pdfExport";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { EvolutionAnalysis } from "./EvolutionAnalysis";
 
 type Scope = "individual_psicologia" | "multidisciplinar";
 
@@ -124,9 +126,23 @@ export function MedicalRecordsTab({ patientId, patientName, scope, isAdmin }: Pr
       patientName,
       body: r.content?.body ?? "",
       author: r.author_name,
+      authorId: r.created_by,
       date: new Date(r.created_at).toLocaleString("pt-BR"),
     });
   };
+
+  // Agrupa por record_type quando for prontuário individual
+  const grouped = useMemo(() => {
+    const map = new Map<RecordType, Record[]>();
+    for (const r of records) {
+      const arr = map.get(r.record_type) ?? [];
+      arr.push(r);
+      map.set(r.record_type, arr);
+    }
+    return map;
+  }, [records]);
+
+  const groupOrder: RecordType[] = ["anamnese", "diagnostico", "evolucao", "documento_cfp"];
 
   return (
     <div className="space-y-4">
@@ -144,6 +160,50 @@ export function MedicalRecordsTab({ patientId, patientName, scope, isAdmin }: Pr
           <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
           <p className="text-muted-foreground">Nenhum registro ainda. Clique em "Novo registro" para começar.</p>
         </div>
+      ) : scope === "individual_psicologia" ? (
+        <Accordion type="multiple" defaultValue={groupOrder.map(String)} className="space-y-2">
+          {groupOrder.map((type) => {
+            const items = grouped.get(type) ?? [];
+            if (items.length === 0) return null;
+            return (
+              <AccordionItem key={type} value={type} className="border rounded-lg px-3">
+                <AccordionTrigger className="hover:no-underline">
+                  <span className="flex items-center gap-2">
+                    <Badge variant="secondary">{recordTypeLabels[type]}</Badge>
+                    <span className="text-xs text-muted-foreground">{items.length}</span>
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-2 pb-2">
+                    {items.map((r) => (
+                      <div key={r.id} className="border rounded-lg p-3 bg-card">
+                        <div className="flex justify-between items-start gap-2">
+                          <div className="min-w-0">
+                            <h4 className="font-semibold text-sm truncate">{r.title}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {r.author_name} · {new Date(r.created_at).toLocaleString("pt-BR")}
+                              {r.updated_at !== r.created_at && " · editado"}
+                            </p>
+                          </div>
+                          <div className="flex gap-1 shrink-0">
+                            <Button variant="ghost" size="icon" onClick={() => handleExport(r)} title="Exportar PDF"><FileDown className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleEdit(r)} title="Editar"><Pencil className="w-4 h-4" /></Button>
+                            {isAdmin && (
+                              <Button variant="ghost" size="icon" onClick={() => handleDelete(r.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                            )}
+                          </div>
+                        </div>
+                        {r.content?.body && (
+                          <p className="text-xs text-muted-foreground line-clamp-2 whitespace-pre-wrap mt-2">{r.content.body}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
+        </Accordion>
       ) : (
         <div className="space-y-3">
           {records.map((r) => (
@@ -160,27 +220,23 @@ export function MedicalRecordsTab({ patientId, patientName, scope, isAdmin }: Pr
                   </p>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" onClick={() => handleExport(r)} title="Exportar PDF">
-                    <FileDown className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(r)} title="Editar">
-                    <Pencil className="w-4 h-4" />
-                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleExport(r)} title="Exportar PDF"><FileDown className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit(r)} title="Editar"><Pencil className="w-4 h-4" /></Button>
                   {isAdmin && (
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(r.id)} title="Excluir">
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDelete(r.id)} title="Excluir"><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   )}
                 </div>
               </div>
               {r.content?.body && (
-                <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap mt-2">
-                  {r.content.body}
-                </p>
+                <p className="text-sm text-muted-foreground line-clamp-3 whitespace-pre-wrap mt-2">{r.content.body}</p>
               )}
             </div>
           ))}
         </div>
+      )}
+
+      {scope === "individual_psicologia" && records.length > 0 && (
+        <EvolutionAnalysis patientId={patientId} />
       )}
 
       <RecordEditor
