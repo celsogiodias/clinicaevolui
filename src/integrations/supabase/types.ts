@@ -71,10 +71,12 @@ export type Database = {
         Row: {
           amount: number
           appointment_id: string | null
+          category: string | null
           created_at: string
           created_by: string
           description: string
           entry_date: string
+          entry_type: Database["public"]["Enums"]["financial_type"]
           id: string
           method: Database["public"]["Enums"]["payment_method"] | null
           notes: string | null
@@ -87,10 +89,12 @@ export type Database = {
         Insert: {
           amount: number
           appointment_id?: string | null
+          category?: string | null
           created_at?: string
           created_by: string
           description: string
           entry_date?: string
+          entry_type?: Database["public"]["Enums"]["financial_type"]
           id?: string
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
@@ -103,10 +107,12 @@ export type Database = {
         Update: {
           amount?: number
           appointment_id?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string
           description?: string
           entry_date?: string
+          entry_type?: Database["public"]["Enums"]["financial_type"]
           id?: string
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
@@ -233,12 +239,67 @@ export type Database = {
         }
         Relationships: []
       }
+      professional_profiles: {
+        Row: {
+          council_number: string | null
+          council_type: string | null
+          created_at: string
+          signature_path: string | null
+          stamp_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          council_number?: string | null
+          council_type?: string | null
+          created_at?: string
+          signature_path?: string | null
+          stamp_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          council_number?: string | null
+          council_type?: string | null
+          created_at?: string
+          signature_path?: string | null
+          stamp_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      professional_specialties: {
+        Row: {
+          created_at: string
+          default_role: Database["public"]["Enums"]["app_role"]
+          id: string
+          is_system: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_role?: Database["public"]["Enums"]["app_role"]
+          id?: string
+          is_system?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_role?: Database["public"]["Enums"]["app_role"]
+          id?: string
+          is_system?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
           email: string | null
           full_name: string | null
           id: string
+          specialty_id: string | null
           updated_at: string
         }
         Insert: {
@@ -246,6 +307,7 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
+          specialty_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -253,9 +315,18 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          specialty_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "professional_specialties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       record_attachments: {
         Row: {
@@ -382,6 +453,7 @@ export type Database = {
         | "remarcado"
         | "cancelado"
         | "realizado"
+      financial_type: "entrada" | "saida"
       payment_method:
         | "dinheiro"
         | "pix"
@@ -528,6 +600,7 @@ export const Constants = {
         "cancelado",
         "realizado",
       ],
+      financial_type: ["entrada", "saida"],
       payment_method: [
         "dinheiro",
         "pix",
