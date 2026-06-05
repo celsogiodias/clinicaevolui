@@ -9,8 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt, TrendingUp, TrendingDown } from "lucide-react";
 import { exportEntriesToCSV, exportEntriesToPDF, generateReceiptPDF, type ExportEntry } from "@/lib/financialExport";
+import { ParetoChart } from "@/components/financeiro/ParetoChart";
+import { FinancialAdvisor } from "@/components/financeiro/FinancialAdvisor";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
@@ -18,11 +20,12 @@ export const Route = createFileRoute("/_authenticated/financeiro")({
 
 type Status = "pendente" | "pago" | "cancelado";
 type Method = "dinheiro" | "pix" | "cartao" | "transferencia" | "convenio" | "outro";
+type EntryType = "entrada" | "saida";
 type Role = "admin" | "psicologo" | "profissional" | "administrativo";
 
 interface Entry {
   id: string;
-  patient_id: string;
+  patient_id: string | null;
   professional_id: string;
   description: string;
   amount: number;
@@ -32,6 +35,8 @@ interface Entry {
   paid_at: string | null;
   notes: string | null;
   created_by: string;
+  entry_type: EntryType;
+  category: string | null;
 }
 
 interface PatientRow { id: string; full_name: string }
@@ -69,6 +74,7 @@ function FinanceiroPage() {
   const [to, setTo] = useState(monthEndISO());
   const [filterProf, setFilterProf] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
+  const [filterType, setFilterType] = useState<EntryType | "all">("all");
 
   const canSeeAll = role === "admin" || role === "administrativo";
 
@@ -99,19 +105,69 @@ function FinanceiroPage() {
     return entries.filter((e) => {
       if (filterProf !== "all" && e.professional_id !== filterProf) return false;
       if (filterStatus !== "all" && e.status !== filterStatus) return false;
+      if (filterType !== "all" && e.entry_type !== filterType) return false;
       return true;
     });
-  }, [entries, filterProf, filterStatus]);
+  }, [entries, filterProf, filterStatus, filterType]);
 
   const totals = useMemo(() => {
-    const t = { total: 0, pago: 0, pendente: 0, cancelado: 0 };
+    const t = { total: 0, pago: 0, pendente: 0, cancelado: 0, receita: 0, despesa: 0, resultado: 0 };
     for (const e of filtered) {
       const v = Number(e.amount) || 0;
-      if (e.status !== "cancelado") t.total += v;
+      if (e.status !== "cancelado") {
+        t.total += v;
+        if (e.entry_type === "entrada") t.receita += v;
+        else t.despesa += v;
+      }
       t[e.status] += v;
     }
+    t.resultado = t.receita - t.despesa;
     return t;
   }, [filtered]);
+
+  const paretoData = useMemo(() => {
+    const sumBy = (type: EntryType) => {
+      const m = new Map<string, number>();
+      for (const e of filtered) {
+        if (e.entry_type !== type || e.status === "cancelado") continue;
+        const k = (e.category && e.category.trim()) || "Sem categoria";
+        m.set(k, (m.get(k) ?? 0) + Number(e.amount || 0));
+      }
+      return Array.from(m.entries()).map(([category, amount]) => ({ category, amount }));
+    };
+    return { receitas: sumBy("entrada"), despesas: sumBy("saida") };
+  }, [filtered]);
+
+  const advisorSummary = useMemo(() => {
+    const paidEntries = filtered.filter((e) => e.entry_type === "entrada" && e.status === "pago");
+    const ticketMedio = paidEntries.length ? paidEntries.reduce((s, e) => s + Number(e.amount || 0), 0) / paidEntries.length : 0;
+    const entradas = filtered.filter((e) => e.entry_type === "entrada" && e.status !== "cancelado");
+    const inadimplencia = entradas.length
+      ? entradas.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount || 0), 0) /
+        entradas.reduce((s, e) => s + Number(e.amount || 0), 0) * 100
+      : 0;
+    const monthMap = new Map<string, { receita: number; despesa: number }>();
+    for (const e of filtered) {
+      if (e.status === "cancelado") continue;
+      const m = e.entry_date.slice(0, 7);
+      const cur = monthMap.get(m) ?? { receita: 0, despesa: 0 };
+      if (e.entry_type === "entrada") cur.receita += Number(e.amount || 0);
+      else cur.despesa += Number(e.amount || 0);
+      monthMap.set(m, cur);
+    }
+    return {
+      periodFrom: from,
+      periodTo: to,
+      totalReceita: totals.receita,
+      totalDespesa: totals.despesa,
+      resultado: totals.resultado,
+      ticketMedio,
+      inadimplencia: Math.round(inadimplencia * 10) / 10,
+      receitaPorCategoria: paretoData.receitas,
+      despesaPorCategoria: paretoData.despesas,
+      evolucaoMensal: Array.from(monthMap.entries()).sort().map(([month, v]) => ({ month, ...v })),
+    };
+  }, [filtered, totals, paretoData, from, to]);
 
   const patientName = (id: string) => patients.find((p) => p.id === id)?.full_name ?? "—";
   const profName = (id: string) => professionals.find((p) => p.user_id === id)?.full_name ?? "—";
