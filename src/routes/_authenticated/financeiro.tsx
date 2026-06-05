@@ -9,8 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt, TrendingUp, TrendingDown } from "lucide-react";
 import { exportEntriesToCSV, exportEntriesToPDF, generateReceiptPDF, type ExportEntry } from "@/lib/financialExport";
+import { ParetoChart } from "@/components/financeiro/ParetoChart";
+import { FinancialAdvisor } from "@/components/financeiro/FinancialAdvisor";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
@@ -18,6 +20,7 @@ export const Route = createFileRoute("/_authenticated/financeiro")({
 
 type Status = "pendente" | "pago" | "cancelado";
 type Method = "dinheiro" | "pix" | "cartao" | "transferencia" | "convenio" | "outro";
+type EntryType = "entrada" | "saida";
 type Role = "admin" | "psicologo" | "profissional" | "administrativo";
 
 interface Entry {
@@ -32,6 +35,8 @@ interface Entry {
   paid_at: string | null;
   notes: string | null;
   created_by: string;
+  entry_type: EntryType;
+  category: string | null;
 }
 
 interface PatientRow { id: string; full_name: string }
@@ -69,6 +74,7 @@ function FinanceiroPage() {
   const [to, setTo] = useState(monthEndISO());
   const [filterProf, setFilterProf] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
+  const [filterType, setFilterType] = useState<EntryType | "all">("all");
 
   const canSeeAll = role === "admin" || role === "administrativo";
 
@@ -99,19 +105,69 @@ function FinanceiroPage() {
     return entries.filter((e) => {
       if (filterProf !== "all" && e.professional_id !== filterProf) return false;
       if (filterStatus !== "all" && e.status !== filterStatus) return false;
+      if (filterType !== "all" && e.entry_type !== filterType) return false;
       return true;
     });
-  }, [entries, filterProf, filterStatus]);
+  }, [entries, filterProf, filterStatus, filterType]);
 
   const totals = useMemo(() => {
-    const t = { total: 0, pago: 0, pendente: 0, cancelado: 0 };
+    const t = { total: 0, pago: 0, pendente: 0, cancelado: 0, receita: 0, despesa: 0, resultado: 0 };
     for (const e of filtered) {
       const v = Number(e.amount) || 0;
-      if (e.status !== "cancelado") t.total += v;
+      if (e.status !== "cancelado") {
+        t.total += v;
+        if (e.entry_type === "entrada") t.receita += v;
+        else t.despesa += v;
+      }
       t[e.status] += v;
     }
+    t.resultado = t.receita - t.despesa;
     return t;
   }, [filtered]);
+
+  const paretoData = useMemo(() => {
+    const sumBy = (type: EntryType) => {
+      const m = new Map<string, number>();
+      for (const e of filtered) {
+        if (e.entry_type !== type || e.status === "cancelado") continue;
+        const k = (e.category && e.category.trim()) || "Sem categoria";
+        m.set(k, (m.get(k) ?? 0) + Number(e.amount || 0));
+      }
+      return Array.from(m.entries()).map(([category, amount]) => ({ category, amount }));
+    };
+    return { receitas: sumBy("entrada"), despesas: sumBy("saida") };
+  }, [filtered]);
+
+  const advisorSummary = useMemo(() => {
+    const paidEntries = filtered.filter((e) => e.entry_type === "entrada" && e.status === "pago");
+    const ticketMedio = paidEntries.length ? paidEntries.reduce((s, e) => s + Number(e.amount || 0), 0) / paidEntries.length : 0;
+    const entradas = filtered.filter((e) => e.entry_type === "entrada" && e.status !== "cancelado");
+    const inadimplencia = entradas.length
+      ? entradas.filter((e) => e.status === "pendente").reduce((s, e) => s + Number(e.amount || 0), 0) /
+        entradas.reduce((s, e) => s + Number(e.amount || 0), 0) * 100
+      : 0;
+    const monthMap = new Map<string, { receita: number; despesa: number }>();
+    for (const e of filtered) {
+      if (e.status === "cancelado") continue;
+      const m = e.entry_date.slice(0, 7);
+      const cur = monthMap.get(m) ?? { receita: 0, despesa: 0 };
+      if (e.entry_type === "entrada") cur.receita += Number(e.amount || 0);
+      else cur.despesa += Number(e.amount || 0);
+      monthMap.set(m, cur);
+    }
+    return {
+      periodFrom: from,
+      periodTo: to,
+      totalReceita: totals.receita,
+      totalDespesa: totals.despesa,
+      resultado: totals.resultado,
+      ticketMedio,
+      inadimplencia: Math.round(inadimplencia * 10) / 10,
+      receitaPorCategoria: paretoData.receitas,
+      despesaPorCategoria: paretoData.despesas,
+      evolucaoMensal: Array.from(monthMap.entries()).sort().map(([month, v]) => ({ month, ...v })),
+    };
+  }, [filtered, totals, paretoData, from, to]);
 
   const patientName = (id: string) => patients.find((p) => p.id === id)?.full_name ?? "—";
   const profName = (id: string) => professionals.find((p) => p.user_id === id)?.full_name ?? "—";
@@ -129,6 +185,8 @@ function FinanceiroPage() {
       paid_at: null,
       notes: null,
       created_by: currentUserId ?? "",
+      entry_type: "entrada",
+      category: null,
     });
     setDialogOpen(true);
   };
@@ -151,6 +209,8 @@ function FinanceiroPage() {
       status: editing.status,
       method: editing.method,
       notes: editing.notes?.trim() || null,
+      entry_type: editing.entry_type,
+      category: editing.category?.trim() || null,
     };
 
     if (editing.id) {
@@ -223,7 +283,7 @@ function FinanceiroPage() {
     load();
   };
 
-  const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
+  const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFilterType("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
 
   return (
     <div className="space-y-6">
@@ -244,11 +304,15 @@ function FinanceiroPage() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Total no período</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmtBRL(totals.total)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Recebido</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{fmtBRL(totals.pago)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">A receber</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-amber-600">{fmtBRL(totals.pendente)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Cancelados</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-zinc-500">{fmtBRL(totals.cancelado)}</p></CardContent></Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-600" /> Receita</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{fmtBRL(totals.receita)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1"><TrendingDown className="w-3 h-3 text-red-600" /> Despesa</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-red-600">{fmtBRL(totals.despesa)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Resultado</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${totals.resultado >= 0 ? "text-primary" : "text-red-700"}`}>{fmtBRL(totals.resultado)}</p></CardContent></Card>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Recebido</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-green-600">{fmtBRL(totals.pago)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Pendente</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-amber-600">{fmtBRL(totals.pendente)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Cancelado</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-zinc-500">{fmtBRL(totals.cancelado)}</p></CardContent></Card>
       </div>
 
       {/* Filters */}
@@ -268,6 +332,17 @@ function FinanceiroPage() {
               </Select>
             </div>
           )}
+          <div>
+            <Label className="text-xs">Tipo</Label>
+            <Select value={filterType} onValueChange={(v) => setFilterType(v as EntryType | "all")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="entrada">Entradas</SelectItem>
+                <SelectItem value="saida">Saídas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label className="text-xs">Status</Label>
             <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as Status | "all")}>
@@ -362,6 +437,22 @@ function FinanceiroPage() {
                   </Select>
                 </div>
               )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Tipo</Label>
+                  <Select value={editing.entry_type} onValueChange={(v) => setEditing({ ...editing, entry_type: v as EntryType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entrada">Entrada (receita)</SelectItem>
+                      <SelectItem value="saida">Saída (despesa)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Categoria</Label>
+                  <Input value={editing.category ?? ""} onChange={(e) => setEditing({ ...editing, category: e.target.value })} placeholder="Ex.: consulta, aluguel, salários" />
+                </div>
+              </div>
               <div>
                 <Label>Descrição</Label>
                 <Input value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="Ex.: Sessão de psicoterapia" />
@@ -407,6 +498,14 @@ function FinanceiroPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Análise por Pareto + IA consultiva */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ParetoChart title="Receitas por categoria (Pareto)" data={paretoData.receitas} color="hsl(var(--primary))" />
+        <ParetoChart title="Despesas por categoria (Pareto)" data={paretoData.despesas} color="#dc2626" />
+      </div>
+
+      <FinancialAdvisor summary={advisorSummary} />
     </div>
   );
 }
