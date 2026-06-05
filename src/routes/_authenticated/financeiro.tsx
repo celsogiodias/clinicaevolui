@@ -25,7 +25,7 @@ type Role = "admin" | "psicologo" | "profissional" | "administrativo";
 
 interface Entry {
   id: string;
-  patient_id: string | null;
+  patient_id: string;
   professional_id: string;
   description: string;
   amount: number;
@@ -185,6 +185,8 @@ function FinanceiroPage() {
       paid_at: null,
       notes: null,
       created_by: currentUserId ?? "",
+      entry_type: "entrada",
+      category: null,
     });
     setDialogOpen(true);
   };
