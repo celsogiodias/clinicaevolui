@@ -209,6 +209,8 @@ function FinanceiroPage() {
       status: editing.status,
       method: editing.method,
       notes: editing.notes?.trim() || null,
+      entry_type: editing.entry_type,
+      category: editing.category?.trim() || null,
     };
 
     if (editing.id) {
