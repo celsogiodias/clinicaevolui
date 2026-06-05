@@ -498,6 +498,14 @@ function FinanceiroPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Análise por Pareto + IA consultiva */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ParetoChart title="Receitas por categoria (Pareto)" data={paretoData.receitas} color="hsl(var(--primary))" />
+        <ParetoChart title="Despesas por categoria (Pareto)" data={paretoData.despesas} color="#dc2626" />
+      </div>
+
+      <FinancialAdvisor summary={advisorSummary} />
     </div>
   );
 }
