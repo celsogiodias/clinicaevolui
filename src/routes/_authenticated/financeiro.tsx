@@ -304,11 +304,15 @@ function FinanceiroPage() {
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Total no período</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{fmtBRL(totals.total)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Recebido</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{fmtBRL(totals.pago)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">A receber</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-amber-600">{fmtBRL(totals.pendente)}</p></CardContent></Card>
-        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Cancelados</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-zinc-500">{fmtBRL(totals.cancelado)}</p></CardContent></Card>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1"><TrendingUp className="w-3 h-3 text-green-600" /> Receita</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-green-600">{fmtBRL(totals.receita)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium flex items-center gap-1"><TrendingDown className="w-3 h-3 text-red-600" /> Despesa</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-red-600">{fmtBRL(totals.despesa)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Resultado</CardTitle></CardHeader><CardContent><p className={`text-2xl font-bold ${totals.resultado >= 0 ? "text-primary" : "text-red-700"}`}>{fmtBRL(totals.resultado)}</p></CardContent></Card>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Recebido</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-green-600">{fmtBRL(totals.pago)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Pendente</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-amber-600">{fmtBRL(totals.pendente)}</p></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground font-medium">Cancelado</CardTitle></CardHeader><CardContent><p className="text-lg font-semibold text-zinc-500">{fmtBRL(totals.cancelado)}</p></CardContent></Card>
       </div>
 
       {/* Filters */}
@@ -328,6 +332,17 @@ function FinanceiroPage() {
               </Select>
             </div>
           )}
+          <div>
+            <Label className="text-xs">Tipo</Label>
+            <Select value={filterType} onValueChange={(v) => setFilterType(v as EntryType | "all")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="entrada">Entradas</SelectItem>
+                <SelectItem value="saida">Saídas</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div>
             <Label className="text-xs">Status</Label>
             <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as Status | "all")}>
