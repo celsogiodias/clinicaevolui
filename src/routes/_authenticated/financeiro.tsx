@@ -283,7 +283,7 @@ function FinanceiroPage() {
     load();
   };
 
-  const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
+  const clearFilters = () => { setFilterProf("all"); setFilterStatus("all"); setFilterType("all"); setFrom(monthStartISO()); setTo(monthEndISO()); };
 
   return (
     <div className="space-y-6">
@@ -437,6 +437,22 @@ function FinanceiroPage() {
                   </Select>
                 </div>
               )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Tipo</Label>
+                  <Select value={editing.entry_type} onValueChange={(v) => setEditing({ ...editing, entry_type: v as EntryType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="entrada">Entrada (receita)</SelectItem>
+                      <SelectItem value="saida">Saída (despesa)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Categoria</Label>
+                  <Input value={editing.category ?? ""} onChange={(e) => setEditing({ ...editing, category: e.target.value })} placeholder="Ex.: consulta, aluguel, salários" />
+                </div>
+              </div>
               <div>
                 <Label>Descrição</Label>
                 <Input value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="Ex.: Sessão de psicoterapia" />
