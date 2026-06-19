@@ -1,10 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Users as UsersIcon, Shield, Loader2 } from "lucide-react";
+import { Users as UsersIcon, Shield, Loader2, Plus, PencilIcon, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Plus, PencilIcon, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -69,12 +67,14 @@ export const Route = createFileRoute("/_authenticated/users")({
   beforeLoad: async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw redirect({ to: "/login" });
+
     const { data } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", user.id)
       .eq("role", "admin")
       .maybeSingle();
+
     if (!data) throw redirect({ to: "/dashboard" });
   },
   component: UsersPage,
@@ -90,6 +90,7 @@ function UsersPage() {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     setCurrentUserId(user?.id ?? null);
+
     const { data, error } = await supabase.rpc("get_users_with_roles");
     if (error) {
       toast.error("Erro ao carregar usuários: " + error.message);
@@ -105,19 +106,22 @@ function UsersPage() {
 
   const handleRoleChange = async (userId: string, newRole: Role) => {
     setUpdatingId(userId);
-    // Remove papéis antigos e insere o novo (1 papel por usuário no momento)
+
     const { error: delError } = await supabase
       .from("user_roles")
       .delete()
       .eq("user_id", userId);
+
     if (delError) {
       toast.error("Erro ao atualizar papel: " + delError.message);
       setUpdatingId(null);
       return;
     }
+
     const { error: insError } = await supabase
       .from("user_roles")
       .insert({ user_id: userId, role: newRole });
+
     if (insError) {
       toast.error("Erro ao atualizar papel: " + insError.message);
     } else {
