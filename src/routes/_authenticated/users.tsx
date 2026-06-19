@@ -15,14 +15,14 @@ import { Badge } from '../../components/ui/badge'
 
 type AppRole = Database['public']['Enums']['app_role']
 
-const roleLabels: Record<<AppRole, string> = {
+const roleLabels: Record<AppRole, string> = {
   admin: 'Administrador(a)',
   psicologo: 'Psicólogo(a)',
   profissional: 'Profissional',
   administrativo: 'Administrativo',
 }
 
-const roleBadgeStyles: Record<<AppRole, string> = {
+const roleBadgeStyles: Record<AppRole, string> = {
   admin: 'bg-red-100 text-red-800 border-red-200 hover:bg-red-100',
   psicologo: 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100',
   profissional: 'bg-green-100 text-green-800 border-green-200 hover:bg-green-100',
@@ -74,8 +74,8 @@ function UsersPage() {
   const [modalEdit, setModalEdit] = useState<{ open: boolean; user: UserRow | null }>({ open: false, user: null })
   const [modalDelete, setModalDelete] = useState<{ open: boolean; user: UserRow | null }>({ open: false, user: null })
   const [submitting, setSubmitting] = useState(false)
-  const [createForm, setCreateForm] = useState<<ProfessionalForm>(DEFAULT_CREATE_FORM)
-  const [editForm, setEditForm] = useState<<ProfessionalForm>(DEFAULT_CREATE_FORM)
+  const [createForm, setCreateForm] = useState<ProfessionalForm>(DEFAULT_CREATE_FORM)
+  const [editForm, setEditForm] = useState<ProfessionalForm>(DEFAULT_CREATE_FORM)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
