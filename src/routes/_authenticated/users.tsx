@@ -229,13 +229,12 @@ function UsersPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Users className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold">Gestão de Profissionais</h1>
+            <div>
+              <h1 className="text-2xl font-bold">Gestão de Profissionais</h1>
+              <p className="text-sm text-muted-foreground">Cadastre, edite e gerencie os profissionais da clínica</p>
+            </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Cadastre, edite e gerencie os profissionais da clínica
-          </p>
         </div>
-
         <Dialog open={modalCreate} onOpenChange={setModalCreate}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -260,9 +259,7 @@ function UsersPage() {
               <div className="space-y-2">
                 <Label htmlFor="createRole">Papel</Label>
                 <Select value={createForm.role} onValueChange={(value: AppRole) => setCreateForm({ ...createForm, role: value })}>
-                  <SelectTrigger id="createRole">
-                    <SelectValue placeholder="Selecione o papel" />
-                  </SelectTrigger>
+                  <SelectTrigger id="createRole"><SelectValue placeholder="Selecione o papel" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="psicologo">Psicólogo(a)</SelectItem>
                     <SelectItem value="profissional">Profissional</SelectItem>
@@ -273,8 +270,7 @@ function UsersPage() {
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setModalCreate(false)} disabled={submitting}>Cancelar</Button>
                 <Button type="submit" disabled={submitting}>
-                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Convidar
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Convidar
                 </Button>
               </DialogFooter>
             </form>
@@ -289,15 +285,11 @@ function UsersPage() {
 
       <div className="bg-card rounded-xl border">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
+          <div className="flex items-center justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
         ) : filteredUsers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Users className="h-10 w-10 text-muted-foreground mb-3" />
-            <p className="text-sm text-muted-foreground">
-              {searchTerm ? 'Nenhum profissional encontrado para esta busca.' : 'Nenhum profissional cadastrado.'}
-            </p>
+            <p className="text-sm text-muted-foreground">{searchTerm ? 'Nenhum profissional encontrado.' : 'Nenhum profissional cadastrado.'}</p>
           </div>
         ) : (
           <Table>
@@ -310,43 +302,38 @@ function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUsers.map((user) => {
-                const isSelf = user.user_id === currentUserId
-                return (
-                  <TableRow key={user.user_id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
-                          {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-medium">{user.full_name || 'Sem nome'}</p>
-                          <p className="text-sm text-muted-foreground">{user.email || 'Sem e-mail'}</p>
-                        </div>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.user_id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                        {(user.full_name || user.email || '?').charAt(0).toUpperCase()}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={roleBadgeStyles[user.role]} variant="outline">
-                        {roleLabels[user.role]}
-                      </Badge>
-                      {isSelf && <span className="ml-2 text-xs text-muted-foreground">(você)</span>}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {new Date(user.created_at).toLocaleDateString('pt-BR')}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(user)} title="Editar">
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => openDelete(user)} title="Excluir">
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                      <div>
+                        <p className="font-medium">{user.full_name || 'Sem nome'}</p>
+                        <p className="text-sm text-muted-foreground">{user.email || 'Sem e-mail'}</p>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={roleBadgeStyles[user.role]} variant="outline">{roleLabels[user.role]}</Badge>
+                    {user.user_id === currentUserId && <span className="ml-2 text-xs text-muted-foreground">(você)</span>}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Date(user.created_at).toLocaleDateString('pt-BR')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" onClick={() => openEdit(user)} title="Editar">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => openDelete(user)} title="Excluir">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         )}
@@ -386,8 +373,7 @@ function UsersPage() {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setModalEdit({ open: false, user: null })} disabled={submitting}>Cancelar</Button>
               <Button type="submit" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Salvar
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Salvar
               </Button>
             </DialogFooter>
           </form>
@@ -399,8 +385,7 @@ function UsersPage() {
           <DialogHeader>
             <DialogTitle>Excluir Profissional</DialogTitle>
             <DialogDescription>
-              Tem certeza que deseja excluir <strong>{modalDelete.user?.full_name || modalDelete.user?.email}</strong>?
-              Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir <strong>{modalDelete.user?.full_name || modalDelete.user?.email}</strong>? Esta ação não pode ser desfeita.
             </DialogDescription>
           </DialogHeader>
           {modalDelete.user?.user_id === currentUserId && (
@@ -409,8 +394,7 @@ function UsersPage() {
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setModalDelete({ open: false, user: null })} disabled={submitting}>Cancelar</Button>
             <Button type="button" variant="destructive" onClick={handleDeleteUser} disabled={submitting || modalDelete.user?.user_id === currentUserId}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirmar Exclusão
+              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Confirmar Exclusão
             </Button>
           </DialogFooter>
         </DialogContent>
