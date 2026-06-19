@@ -4,7 +4,7 @@ import { supabase } from '../../integrations/supabase/client'
 import { inviteProfessional, updateProfessional, deleteProfessional } from '../../lib/admin-users.server'
 import type { Database } from '../../integrations/supabase/types'
 import { toast } from 'sonner'
-import { Loader2, Users, Shield, Plus, Pencil, Trash2, Search, Mail, User, UserCog } from 'lucide-react'
+import { Loader2, Users, Plus, Pencil, Trash2, Search } from 'lucide-react'
 import { Button } from '../../components/ui/button'
 import { Input } from '../../components/ui/input'
 import { Label } from '../../components/ui/label'
@@ -53,14 +53,12 @@ export const Route = createFileRoute('/_authenticated/users')({
   beforeLoad: async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw redirect({ to: '/login' })
-
     const { data } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
       .maybeSingle()
-
     if (!data) throw redirect({ to: '/dashboard' })
   },
   component: UsersPage,
@@ -129,7 +127,6 @@ function UsersPage() {
       toast.error('Já existe um profissional com este e-mail.')
       return
     }
-
     setSubmitting(true)
     try {
       const result = await inviteProfessional({
@@ -161,7 +158,6 @@ function UsersPage() {
       toast.error('Preencha todos os campos.')
       return
     }
-
     setSubmitting(true)
     try {
       const result = await updateProfessional({
@@ -193,7 +189,6 @@ function UsersPage() {
       toast.error('Você não pode excluir a própria conta.')
       return
     }
-
     setSubmitting(true)
     try {
       const result = await deleteProfessional({
@@ -228,7 +223,6 @@ function UsersPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-3">
@@ -252,38 +246,20 @@ function UsersPage() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>Convidar Profissional</DialogTitle>
-              <DialogDescription>
-                Ele receberá um e-mail com as instruções de acesso.
-              </DialogDescription>
+              <DialogDescription>Ele receberá um e-mail com as instruções de acesso.</DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nome completo</Label>
-                <Input
-                  id="fullName"
-                  placeholder="Digite o nome completo"
-                  value={createForm.fullName}
-                  onChange={(e) => setCreateForm({ ...createForm, fullName: e.target.value })}
-                  required
-                />
+                <Input id="fullName" placeholder="Digite o nome completo" value={createForm.fullName} onChange={(e) => setCreateForm({ ...createForm, fullName: e.target.value })} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="profissional@clinica.com"
-                  value={createForm.email}
-                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                  required
-                />
+                <Input id="email" type="email" placeholder="profissional@clinica.com" value={createForm.email} onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="createRole">Papel</Label>
-                <Select
-                  value={createForm.role}
-                  onValueChange={(value: AppRole) => setCreateForm({ ...createForm, role: value })}
-                >
+                <Select value={createForm.role} onValueChange={(value: AppRole) => setCreateForm({ ...createForm, role: value })}>
                   <SelectTrigger id="createRole">
                     <SelectValue placeholder="Selecione o papel" />
                   </SelectTrigger>
@@ -295,9 +271,7 @@ function UsersPage() {
                 </Select>
               </div>
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setModalCreate(false)} disabled={submitting}>
-                  Cancelar
-                </Button>
+                <Button type="button" variant="outline" onClick={() => setModalCreate(false)} disabled={submitting}>Cancelar</Button>
                 <Button type="submit" disabled={submitting}>
                   {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Convidar
@@ -308,18 +282,11 @@ function UsersPage() {
         </Dialog>
       </div>
 
-      {/* SEARCH */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar por nome ou e-mail..."
-          className="pl-9"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <Input placeholder="Buscar por nome ou e-mail..." className="pl-9" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
       </div>
 
-      {/* TABLE */}
       <div className="bg-card rounded-xl border">
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -389,7 +356,6 @@ function UsersPage() {
         Você não pode alterar o próprio papel para evitar perder acesso de administrador.
       </p>
 
-      {/* EDIT MODAL */}
       <Dialog open={modalEdit.open} onOpenChange={(open) => setModalEdit({ open, user: open ? modalEdit.user : null })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -399,12 +365,7 @@ function UsersPage() {
           <form onSubmit={handleEditUser} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="editName">Nome completo</Label>
-              <Input
-                id="editName"
-                value={editForm.fullName}
-                onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-                required
-              />
+              <Input id="editName" value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} required />
             </div>
             <div className="space-y-2">
               <Label>E-mail</Label>
@@ -412,13 +373,8 @@ function UsersPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="editRole">Papel</Label>
-              <Select
-                value={editForm.role}
-                onValueChange={(value: AppRole) => setEditForm({ ...editForm, role: value })}
-              >
-                <SelectTrigger id="editRole">
-                  <SelectValue />
-                </SelectTrigger>
+              <Select value={editForm.role} onValueChange={(value: AppRole) => setEditForm({ ...editForm, role: value })}>
+                <SelectTrigger id="editRole"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Administrador(a)</SelectItem>
                   <SelectItem value="psicologo">Psicólogo(a)</SelectItem>
@@ -428,9 +384,7 @@ function UsersPage() {
               </Select>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setModalEdit({ open: false, user: null })} disabled={submitting}>
-                Cancelar
-              </Button>
+              <Button type="button" variant="outline" onClick={() => setModalEdit({ open: false, user: null })} disabled={submitting}>Cancelar</Button>
               <Button type="submit" disabled={submitting}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Salvar
@@ -440,7 +394,6 @@ function UsersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* DELETE MODAL */}
       <Dialog open={modalDelete.open} onOpenChange={(open) => setModalDelete({ open, user: open ? modalDelete.user : null })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -454,15 +407,8 @@ function UsersPage() {
             <p className="text-sm text-destructive font-medium">Você não pode excluir a própria conta.</p>
           )}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setModalDelete({ open: false, user: null })} disabled={submitting}>
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDeleteUser}
-              disabled={submitting || modalDelete.user?.user_id === currentUserId}
-            >
+            <Button type="button" variant="outline" onClick={() => setModalDelete({ open: false, user: null })} disabled={submitting}>Cancelar</Button>
+            <Button type="button" variant="destructive" onClick={handleDeleteUser} disabled={submitting || modalDelete.user?.user_id === currentUserId}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Confirmar Exclusão
             </Button>
