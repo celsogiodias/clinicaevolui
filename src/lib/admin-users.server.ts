@@ -2,7 +2,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { createSupabaseAdminClient } from '../integrations/supabase/client.server';
-import { supabase } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -37,7 +36,7 @@ export const inviteProfessional = createServerFn({ method: 'POST' })
     const body = await request.json();
     const parsed = InviteSchema.safeParse(body);
     if (!parsed.success) {
-      return { success: false, userId: null, message: 'Dados inválidos: ' + parsed.error.message };
+      return { success: false, userId: null, message: 'Dados invalidos: ' + parsed.error.message };
     }
     const data = parsed.data;
     const adminClient = createSupabaseAdminClient();
@@ -46,7 +45,7 @@ export const inviteProfessional = createServerFn({ method: 'POST' })
       email: data.email, password, email_confirm: true,
     });
     if (authError || !authData.user) {
-      return { success: false, userId: null, message: 'Erro ao criar usuário: ' + (authError?.message ?? 'desconhecido') };
+      return { success: false, userId: null, message: 'Erro ao criar usuario: ' + (authError?.message ?? 'desconhecido') };
     }
     const userId = authData.user.id;
     const { error: profileError } = await adminClient.from('profiles').insert({ id: userId, full_name: data.fullName, email: data.email });
@@ -68,19 +67,18 @@ export const updateProfessional = createServerFn({ method: 'POST' })
     const body = await request.json();
     const parsed = UpdateSchema.safeParse(body);
     if (!parsed.success) {
-      return { success: false, message: 'Dados inválidos: ' + parsed.error.message };
+      return { success: false, message: 'Dados invalidos: ' + parsed.error.message };
     }
-    const { userId, data: updateData } = parsed.data;
     const adminClient = createSupabaseAdminClient();
-    const errors: string[] = [];
-    if (updateData.fullName) {
-      const { error: profileError } = await adminClient.from('profiles').update({ full_name: updateData.fullName }).eq('id', userId);
-      if (profileError) errors.push('Erro ao atualizar perfil: ' + profileError.message);
+    const errors = [];
+    if (parsed.data.data.fullName) {
+      const { error: pe } = await adminClient.from('profiles').update({ full_name: parsed.data.data.fullName }).eq('id', parsed.data.userId);
+      if (pe) errors.push('Erro ao atualizar perfil: ' + pe.message);
     }
-    if (updateData.role) {
-      await adminClient.from('user_roles').delete().eq('user_id', userId);
-      const { error: insertError } = await adminClient.from('user_roles').insert({ user_id: userId, role: updateData.role as AppRole });
-      if (insertError) errors.push('Erro ao atribuir novo papel: ' + insertError.message);
+    if (parsed.data.data.role) {
+      await adminClient.from('user_roles').delete().eq('user_id', parsed.data.userId);
+      const { error: ie } = await adminClient.from('user_roles').insert({ user_id: parsed.data.userId, role: parsed.data.data.role as AppRole });
+      if (ie) errors.push('Erro ao atribuir novo papel: ' + ie.message);
     }
     if (errors.length > 0) return { success: false, message: errors.join(' | ') };
     return { success: true, message: 'Profissional atualizado com sucesso.' };
@@ -91,20 +89,19 @@ export const deleteProfessional = createServerFn({ method: 'POST' })
     const body = await request.json();
     const parsed = DeleteSchema.safeParse(body);
     if (!parsed.success) {
-      return { success: false, message: 'Dados inválidos: ' + parsed.error.message };
+      return { success: false, message: 'Dados invalidos: ' + parsed.error.message };
     }
-    const { userId } = parsed.data;
     const adminClient = createSupabaseAdminClient();
-    const errors: string[] = [];
+    const errors = [];
     for (const table of ['user_roles', 'professional_profiles']) {
-      const { error } = await adminClient.from(table as any).delete().eq('user_id', userId);
+      const { error } = await adminClient.from(table).delete().eq('user_id', parsed.data.userId);
       if (error) errors.push('Erro ao remover ' + table + ': ' + error.message);
     }
-    const { error: profileError } = await adminClient.from('profiles').delete().eq('id', userId);
+    const { error: profileError } = await adminClient.from('profiles').delete().eq('id', parsed.data.userId);
     if (profileError) errors.push('Erro ao remover perfil: ' + profileError.message);
-    const { error: authError } = await adminClient.auth.admin.deleteUser(userId);
-    if (authError) errors.push('Erro ao remover usuário auth: ' + authError.message);
+    const { error: authError } = await adminClient.auth.admin.deleteUser(parsed.data.userId);
+    if (authError) errors.push('Erro ao remover usuario auth: ' + authError.message);
     if (errors.length > 0) return { success: false, message: errors.join(' | ') };
-    return { success: true, message: 'Profissional excluído com sucesso.' };
+    return { success: true, message: 'Profissional excluido com sucesso.' };
   });
 "@ | Out-File -FilePath "src/lib/admin-users.server.ts" -Encoding UTF8 -Force
