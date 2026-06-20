@@ -2,12 +2,10 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { createSupabaseAdminClient } from '../integrations/supabase/client.server';
-import { supabase } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
+import { parseCookies } from 'vinxi/http';
 
 type AppRole = Database['public']['Enums']['app_role'];
-
-const PROFESSIONAL_ROLES: AppRole[] = ['psicologo', 'profissional', 'administrativo'];
 
 function generatePassword(length = 8): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
@@ -18,21 +16,59 @@ function generatePassword(length = 8): string {
   return password;
 }
 
-async function ensureAdmin(): Promise<{ userId: string } | { error: string }> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+function getSupabaseAuthToken(request: Request): string | null {
+  const cookieHeader = request.headers.get('cookie') || '';
+  // Tenta todos os padrões possíveis de cookie do Supabase
+  const patterns = [
+    /sb-[^-]+-auth-token=([^;]+)/,
+    /sb-access-token=([^;]+)/,
+    /supabase-auth-token=([^;]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = cookieHeader.match(pattern);
+    if (match) {
+      try {
+        // O token pode vir URL-encoded ou como JSON array
+        const raw = decodeURIComponent(match[1]);
+        // Se for um array JSON [access_token, ...], pega o primeiro
+        if (raw.startsWith('[')) {
+          const parsed = JSON.parse(raw);
+          return parsed[0];
+        }
+        return raw;
+      } catch {
+        return match[1];
+      }
+    }
+  }
+  return null;
+}
+
+async function ensureAdmin(request: Request): Promise<{ userId: string } | { error: string }> {
+  const token = getSupabaseAuthToken(request);
+  if (!token) {
+    return { error: 'Usuário não autenticado.' };
+  }
+
+  const adminClient = createSupabaseAdminClient();
+  const { data: userData, error: userError } = await adminClient.auth.getUser(token);
+  
   if (userError || !userData.user) {
     return { error: 'Usuário não autenticado.' };
   }
+
   const currentUserId = userData.user.id;
-  const { data: roleData, error: roleError } = await supabase
+  const { data: roleData, error: roleError } = await adminClient
     .from('user_roles')
     .select('role')
     .eq('user_id', currentUserId)
     .eq('role', 'admin')
     .maybeSingle();
+
   if (roleError || !roleData) {
     return { error: 'Acesso negado. Apenas administradores podem executar esta ação.' };
   }
+
   return { userId: currentUserId };
 }
 
@@ -61,7 +97,7 @@ export const inviteProfessional = createServerFn({ method: 'POST' })
     }
     const data = parsed.data;
 
-    const adminCheck = await ensureAdmin();
+    const adminCheck = await ensureAdmin(request);
     if ('error' in adminCheck) {
       return { success: false, userId: null, message: adminCheck.error };
     }
@@ -97,7 +133,7 @@ export const updateProfessional = createServerFn({ method: 'POST' })
     }
     const data = parsed.data;
 
-    const adminCheck = await ensureAdmin();
+    const adminCheck = await ensureAdmin(request);
     if ('error' in adminCheck) return { success: false, message: adminCheck.error };
     const adminClient = createSupabaseAdminClient();
     const errors: string[] = [];
@@ -123,7 +159,7 @@ export const deleteProfessional = createServerFn({ method: 'POST' })
     }
     const data = parsed.data;
 
-    const adminCheck = await ensureAdmin();
+    const adminCheck = await ensureAdmin(request);
     if ('error' in adminCheck) return { success: false, message: adminCheck.error };
     if (data.userId === adminCheck.userId) return { success: false, message: 'Você não pode excluir sua própria conta.' };
     const adminClient = createSupabaseAdminClient();
