@@ -41,22 +41,22 @@ export const inviteProfessional = createServerFn({ method: 'POST' })
     const data = parsed.data;
     const adminClient = createSupabaseAdminClient();
     const password = generatePassword(8);
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: data.email, password, email_confirm: true,
     });
     if (authError || !authData.user) {
       return { success: false, userId: null, message: 'Erro ao criar usuario: ' + (authError?.message ?? 'desconhecido') };
     }
     const userId = authData.user.id;
-    const { error: profileError } = await adminClient.from('profiles').insert({ id: userId, full_name: data.fullName, email: data.email });
+    const { error: profileError } = await supabaseAdmin.from('profiles').insert({ id: userId, full_name: data.fullName, email: data.email });
     if (profileError) {
-      await adminClient.auth.admin.deleteUser(userId);
+      await supabaseAdmin.auth.admin.deleteUser(userId);
       return { success: false, userId: null, message: 'Erro ao criar perfil: ' + profileError.message };
     }
-    const { error: roleError } = await adminClient.from('user_roles').insert({ user_id: userId, role: data.role as AppRole });
+    const { error: roleError } = await supabaseAdmin.from('user_roles').insert({ user_id: userId, role: data.role as AppRole });
     if (roleError) {
-      await adminClient.from('profiles').delete().eq('id', userId);
-      await adminClient.auth.admin.deleteUser(userId);
+      await supabaseAdmin.from('profiles').delete().eq('id', userId);
+      await supabaseAdmin.auth.admin.deleteUser(userId);
       return { success: false, userId: null, message: 'Erro ao atribuir papel: ' + roleError.message };
     }
     return { success: true, userId, message: 'Profissional convidado com sucesso.' };
@@ -72,12 +72,12 @@ export const updateProfessional = createServerFn({ method: 'POST' })
     const adminClient = createSupabaseAdminClient();
     const errors = [];
     if (parsed.data.data.fullName) {
-      const { error: pe } = await adminClient.from('profiles').update({ full_name: parsed.data.data.fullName }).eq('id', parsed.data.userId);
+      const { error: pe } = await supabaseAdmin.from('profiles').update({ full_name: parsed.data.data.fullName }).eq('id', parsed.data.userId);
       if (pe) errors.push('Erro ao atualizar perfil: ' + pe.message);
     }
     if (parsed.data.data.role) {
-      await adminClient.from('user_roles').delete().eq('user_id', parsed.data.userId);
-      const { error: ie } = await adminClient.from('user_roles').insert({ user_id: parsed.data.userId, role: parsed.data.data.role as AppRole });
+      await supabaseAdmin.from('user_roles').delete().eq('user_id', parsed.data.userId);
+      const { error: ie } = await supabaseAdmin.from('user_roles').insert({ user_id: parsed.data.userId, role: parsed.data.data.role as AppRole });
       if (ie) errors.push('Erro ao atribuir novo papel: ' + ie.message);
     }
     if (errors.length > 0) return { success: false, message: errors.join(' | ') };
@@ -94,12 +94,12 @@ export const deleteProfessional = createServerFn({ method: 'POST' })
     const adminClient = createSupabaseAdminClient();
     const errors = [];
     for (const table of ['user_roles', 'professional_profiles']) {
-      const { error } = await adminClient.from(table).delete().eq('user_id', parsed.data.userId);
+      const { error } = await supabaseAdmin.from(table).delete().eq('user_id', parsed.data.userId);
       if (error) errors.push('Erro ao remover ' + table + ': ' + error.message);
     }
-    const { error: profileError } = await adminClient.from('profiles').delete().eq('id', parsed.data.userId);
+    const { error: profileError } = await supabaseAdmin.from('profiles').delete().eq('id', parsed.data.userId);
     if (profileError) errors.push('Erro ao remover perfil: ' + profileError.message);
-    const { error: authError } = await adminClient.auth.admin.deleteUser(parsed.data.userId);
+    const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(parsed.data.userId);
     if (authError) errors.push('Erro ao remover usuario auth: ' + authError.message);
     if (errors.length > 0) return { success: false, message: errors.join(' | ') };
     return { success: true, message: 'Profissional excluido com sucesso.' };
