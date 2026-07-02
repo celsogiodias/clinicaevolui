@@ -105,11 +105,13 @@ function PublicBooking() {
       const { error } = await supabase.from("appointments").insert({
         patient_id: patientId,
         professional_id: profId,
+        created_by: profId,
         starts_at: starts,
         ends_at: ends,
         status: "pendente",
         notes: observ || null,
       });
+
       if (error) throw error;
 
       const prof = profs.find((p) => p.user_id === profId);
