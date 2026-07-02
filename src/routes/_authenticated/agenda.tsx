@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, XCircle, RefreshCcw, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, XCircle, RefreshCcw, Clock, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
   component: AgendaPage,
