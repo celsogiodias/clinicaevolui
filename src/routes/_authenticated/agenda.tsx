@@ -74,7 +74,7 @@ function AgendaPage() {
         .gte("starts_at", weekStart.toISOString())
         .lt("starts_at", weekEnd.toISOString())
         .order("starts_at"),
-      supabase.from("patients").select("id, full_name").order("full_name"),
+      supabase.from("patients").select("id, full_name, phone").order("full_name"),
       supabase.rpc("get_professionals_for_agenda"),
     ]);
     setAppointments((apps as Appointment[] | null) ?? []);
