@@ -139,10 +139,11 @@ function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button type="submit" className="w-full btn-gold btn-gold-hover" size="lg" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {mode === "login" ? "Entrar" : "Criar conta"}
             </Button>
+
           </form>
 
           {mode === "signup" && (
