@@ -26,7 +26,7 @@ interface Appointment {
   notes: string | null;
 }
 
-interface PatientRow { id: string; full_name: string }
+interface PatientRow { id: string; full_name: string; phone?: string | null }
 interface ProfRow { user_id: string; full_name: string | null; role: string }
 
 const statusMeta: Record<Status, { label: string; dot: string; bg: string; ring: string }> = {
