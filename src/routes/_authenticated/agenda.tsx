@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, XCircle, RefreshCcw, Clock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Loader2, Trash2, CheckCircle2, XCircle, RefreshCcw, Clock, MessageCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/agenda")({
   component: AgendaPage,
@@ -26,7 +26,7 @@ interface Appointment {
   notes: string | null;
 }
 
-interface PatientRow { id: string; full_name: string }
+interface PatientRow { id: string; full_name: string; phone?: string | null }
 interface ProfRow { user_id: string; full_name: string | null; role: string }
 
 const statusMeta: Record<Status, { label: string; dot: string; bg: string; ring: string }> = {
@@ -74,7 +74,7 @@ function AgendaPage() {
         .gte("starts_at", weekStart.toISOString())
         .lt("starts_at", weekEnd.toISOString())
         .order("starts_at"),
-      supabase.from("patients").select("id, full_name").order("full_name"),
+      supabase.from("patients").select("id, full_name, phone").order("full_name"),
       supabase.rpc("get_professionals_for_agenda"),
     ]);
     setAppointments((apps as Appointment[] | null) ?? []);
@@ -401,8 +401,25 @@ function AppointmentDialog({
               <Button size="sm" variant="outline" onClick={() => onQuickStatus(form, "realizado")}>
                 <Clock className="w-4 h-4 mr-1 text-teal-600" /> Realizado
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-green-500 text-green-700 hover:bg-green-50"
+                onClick={() => {
+                  const p = patients.find((x) => x.id === form.patient_id);
+                  const phone = (p?.phone ?? "").replace(/\D/g, "");
+                  if (!phone) { toast.error("Paciente sem telefone cadastrado"); return; }
+                  const quando = new Date(form.starts_at).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" });
+                  const msg = `Olá, ${p?.full_name ?? ""}! Confirmando sua consulta em ${quando}. Por favor, responda SIM para confirmar ou solicite remarcação. — AtivaMente`;
+                  const num = phone.startsWith("55") ? phone : `55${phone}`;
+                  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
+                }}
+              >
+                <MessageCircle className="w-4 h-4 mr-1" /> Enviar WhatsApp
+              </Button>
             </div>
           )}
+
         </div>
 
         <DialogFooter className="gap-2">

@@ -64,13 +64,14 @@ function LoginPage() {
       style={{ background: "var(--gradient-hero)" }}
     >
       <div className="w-full max-w-md">
-        <div className="text-center mb-8 text-white">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
-            <Activity className="w-8 h-8" />
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white shadow-md border mb-4">
+            <Activity className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">Gestão Clínica</h1>
-          <p className="text-white/80 mt-2 text-sm">Cuidado, organização e evolução</p>
+          <h1 className="text-4xl font-serif italic tracking-tight text-gradient-brand">AtivaMente</h1>
+          <p className="text-muted-foreground mt-2 text-sm">Ciência · Conexão · Transformação</p>
         </div>
+
 
         <div
           className="bg-card rounded-2xl p-8 border"
@@ -138,10 +139,11 @@ function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" size="lg" disabled={loading}>
+            <Button type="submit" className="w-full btn-gold btn-gold-hover" size="lg" disabled={loading}>
               {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               {mode === "login" ? "Entrar" : "Criar conta"}
             </Button>
+
           </form>
 
           {mode === "signup" && (
@@ -151,9 +153,10 @@ function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-white/70 text-xs mt-6">
-          <Link to="/" className="hover:text-white">← Voltar</Link>
+        <p className="text-center text-muted-foreground text-xs mt-6">
+          <Link to="/" className="hover:text-foreground">← Voltar</Link>
         </p>
+
       </div>
     </div>
   );
