@@ -153,9 +153,10 @@ function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-white/70 text-xs mt-6">
-          <Link to="/" className="hover:text-white">← Voltar</Link>
+        <p className="text-center text-muted-foreground text-xs mt-6">
+          <Link to="/" className="hover:text-foreground">← Voltar</Link>
         </p>
+
       </div>
     </div>
   );
