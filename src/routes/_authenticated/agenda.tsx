@@ -401,8 +401,25 @@ function AppointmentDialog({
               <Button size="sm" variant="outline" onClick={() => onQuickStatus(form, "realizado")}>
                 <Clock className="w-4 h-4 mr-1 text-teal-600" /> Realizado
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-green-500 text-green-700 hover:bg-green-50"
+                onClick={() => {
+                  const p = patients.find((x) => x.id === form.patient_id);
+                  const phone = (p?.phone ?? "").replace(/\D/g, "");
+                  if (!phone) { toast.error("Paciente sem telefone cadastrado"); return; }
+                  const quando = new Date(form.starts_at).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" });
+                  const msg = `Olá, ${p?.full_name ?? ""}! Confirmando sua consulta em ${quando}. Por favor, responda SIM para confirmar ou solicite remarcação. — AtivaMente`;
+                  const num = phone.startsWith("55") ? phone : `55${phone}`;
+                  window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
+                }}
+              >
+                <MessageCircle className="w-4 h-4 mr-1" /> Enviar WhatsApp
+              </Button>
             </div>
           )}
+
         </div>
 
         <DialogFooter className="gap-2">
