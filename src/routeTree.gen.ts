@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AgendarRouteImport } from './routes/agendar'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConfirmarIdRouteImport } from './routes/confirmar.$id'
 import { Route as AuthenticatedUsersRouteImport } from './routes/_authenticated/users'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedMeuPerfilRouteImport } from './routes/_authenticated/meu-perfil'
@@ -42,6 +43,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmarIdRoute = ConfirmarIdRouteImport.update({
+  id: '/confirmar/$id',
+  path: '/confirmar/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedUsersRoute = AuthenticatedUsersRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/confirmar/$id': typeof ConfirmarIdRoute
   '/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/patients/new': typeof AuthenticatedPatientsNewRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/users': typeof AuthenticatedUsersRoute
+  '/confirmar/$id': typeof ConfirmarIdRoute
   '/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/patients/new': typeof AuthenticatedPatientsNewRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/meu-perfil': typeof AuthenticatedMeuPerfilRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/users': typeof AuthenticatedUsersRoute
+  '/confirmar/$id': typeof ConfirmarIdRoute
   '/_authenticated/patients/$id': typeof AuthenticatedPatientsIdRoute
   '/_authenticated/patients/new': typeof AuthenticatedPatientsNewRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/meu-perfil'
     | '/relatorios'
     | '/users'
+    | '/confirmar/$id'
     | '/patients/$id'
     | '/patients/new'
     | '/patients/'
@@ -183,6 +193,7 @@ export interface FileRouteTypes {
     | '/meu-perfil'
     | '/relatorios'
     | '/users'
+    | '/confirmar/$id'
     | '/patients/$id'
     | '/patients/new'
     | '/patients'
@@ -200,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/meu-perfil'
     | '/_authenticated/relatorios'
     | '/_authenticated/users'
+    | '/confirmar/$id'
     | '/_authenticated/patients/$id'
     | '/_authenticated/patients/new'
     | '/_authenticated/patients/'
@@ -210,6 +222,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AgendarRoute: typeof AgendarRoute
   LoginRoute: typeof LoginRoute
+  ConfirmarIdRoute: typeof ConfirmarIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirmar/$id': {
+      id: '/confirmar/$id'
+      path: '/confirmar/$id'
+      fullPath: '/confirmar/$id'
+      preLoaderRoute: typeof ConfirmarIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/users': {
@@ -359,6 +379,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AgendarRoute: AgendarRoute,
   LoginRoute: LoginRoute,
+  ConfirmarIdRoute: ConfirmarIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

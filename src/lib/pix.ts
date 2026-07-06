@@ -5,7 +5,6 @@ function tlv(id: string, value: string): string {
   return `${id}${len}${value}`;
 }
 
-// Remove acentos e caracteres não permitidos
 function sanitize(s: string, max: number): string {
   return s
     .normalize("NFD")
@@ -28,12 +27,12 @@ function crc16(payload: string): string {
 }
 
 export interface PixParams {
-  key: string;           // chave Pix (CPF, e-mail, telefone, aleatória)
-  merchantName: string;  // nome do recebedor
-  merchantCity: string;  // cidade
-  amount?: number;       // valor em R$
-  txid?: string;         // identificador (até 25 chars alfanuméricos)
-  description?: string;  // descrição/mensagem opcional
+  key: string;
+  merchantName: string;
+  merchantCity: string;
+  amount?: number;
+  txid?: string;
+  description?: string;
 }
 
 export function generatePixPayload(p: PixParams): string {
@@ -44,23 +43,16 @@ export function generatePixPayload(p: PixParams): string {
 
   const txid = sanitize(p.txid || "***", 25) || "***";
 
-  const payload =
-    tlv("00", "01") +                                  // Payload Format
-    tlv("26", gui + keyField + descField).slice(4) &&  // placeholder — will rebuild below
-    "";
-
-  // Rebuild corretamente:
-  const parts = [
-    tlv("00", "01"),                                    // Payload Format Indicator
-    merchantAccount,                                    // Merchant Account Information
-    tlv("52", "0000"),                                  // Merchant Category Code
-    tlv("53", "986"),                                   // Moeda (BRL)
-    p.amount && p.amount > 0 ? tlv("54", p.amount.toFixed(2)) : "",
-    tlv("58", "BR"),                                    // País
-    tlv("59", sanitize(p.merchantName, 25) || "Recebedor"),
-    tlv("60", sanitize(p.merchantCity, 15) || "BRASIL"),
-    tlv("62", tlv("05", txid)),                         // Additional Data — txid
-  ].join("");
+  const parts =
+    tlv("00", "01") +
+    merchantAccount +
+    tlv("52", "0000") +
+    tlv("53", "986") +
+    (p.amount && p.amount > 0 ? tlv("54", p.amount.toFixed(2)) : "") +
+    tlv("58", "BR") +
+    tlv("59", sanitize(p.merchantName, 25) || "Recebedor") +
+    tlv("60", sanitize(p.merchantCity, 15) || "BRASIL") +
+    tlv("62", tlv("05", txid));
 
   const toCrc = parts + "6304";
   return toCrc + crc16(toCrc);
