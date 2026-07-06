@@ -9,10 +9,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, Loader2, Trash2, Pencil, DollarSign, CheckCircle2, Clock, XCircle, FileSpreadsheet, FileDown, Receipt, TrendingUp, TrendingDown, QrCode } from "lucide-react";
 import { exportEntriesToCSV, exportEntriesToPDF, generateReceiptPDF, type ExportEntry } from "@/lib/financialExport";
 import { ParetoChart } from "@/components/financeiro/ParetoChart";
 import { FinancialAdvisor } from "@/components/financeiro/FinancialAdvisor";
+import { PixDialog } from "@/components/financeiro/PixDialog";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
   component: FinanceiroPage,
@@ -68,6 +69,7 @@ function FinanceiroPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Entry | null>(null);
+  const [pixEntry, setPixEntry] = useState<Entry | null>(null);
 
   // filters
   const [from, setFrom] = useState(monthStartISO());
@@ -397,6 +399,11 @@ function FinanceiroPage() {
                         </span>
                       </td>
                       <td className="p-3 text-right whitespace-nowrap">
+                        {e.entry_type === "entrada" && e.status !== "cancelado" && (
+                          <Button size="sm" variant="ghost" className="text-primary" title="Cobrar via Pix" onClick={() => setPixEntry(e)}>
+                            <QrCode className="w-4 h-4" />
+                          </Button>
+                        )}
                         {e.status === "pendente" && (
                           <Button size="sm" variant="ghost" className="text-green-700" onClick={() => quickStatus(e, "pago")}>Pagar</Button>
                         )}
@@ -506,6 +513,19 @@ function FinanceiroPage() {
       </div>
 
       <FinancialAdvisor summary={advisorSummary} />
+
+      <PixDialog
+        open={!!pixEntry}
+        onClose={() => setPixEntry(null)}
+        entry={pixEntry ? {
+          id: pixEntry.id,
+          description: pixEntry.description,
+          amount: Number(pixEntry.amount),
+          status: pixEntry.status,
+          patient_name: patientName(pixEntry.patient_id),
+        } : null}
+        onPaid={load}
+      />
     </div>
   );
 }
