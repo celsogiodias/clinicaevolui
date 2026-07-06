@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
+import { PublicBookingCard } from "@/components/PublicBookingCard";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
@@ -123,6 +124,8 @@ function Dashboard() {
         <StatCard icon={UserPlus} label="Novos (últimos 7 dias)" value={stats.recent} />
         <StatCard icon={Activity} label="Status" value="Ativo" isText />
       </div>
+
+      <PublicBookingCard />
 
       <div>
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">

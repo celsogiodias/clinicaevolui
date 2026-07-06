@@ -395,6 +395,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      confirm_appointment_public: {
+        Args: { _id: string }
+        Returns: {
+          id: string
+          patient_name: string
+          starts_at: string
+          status: string
+        }[]
+      }
       get_patient_team: {
         Args: { _patient_id: string }
         Returns: {

@@ -410,7 +410,8 @@ function AppointmentDialog({
                   const phone = (p?.phone ?? "").replace(/\D/g, "");
                   if (!phone) { toast.error("Paciente sem telefone cadastrado"); return; }
                   const quando = new Date(form.starts_at).toLocaleString("pt-BR", { dateStyle: "long", timeStyle: "short" });
-                  const msg = `Olá, ${p?.full_name ?? ""}! Confirmando sua consulta em ${quando}. Por favor, responda SIM para confirmar ou solicite remarcação. — AtivaMente`;
+                  const confirmUrl = `${window.location.origin}/confirmar/${form.id}`;
+                  const msg = `Olá, ${p?.full_name ?? ""}! Confirmando sua consulta em ${quando}.\n\n✅ Confirme com 1 clique: ${confirmUrl}\n\nSe precisar remarcar, responda esta mensagem. — AtivaMente`;
                   const num = phone.startsWith("55") ? phone : `55${phone}`;
                   window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`, "_blank");
                 }}
