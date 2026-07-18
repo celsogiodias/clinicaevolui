@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { PatientForm, type PatientFormData } from "@/components/PatientForm";
+import { safeError } from "@/lib/safe-errors"
 
 export const Route = createFileRoute("/_authenticated/patients/new")({
   component: NewPatient,
@@ -26,7 +27,7 @@ function NewPatient() {
       created_by: user.id,
     });
     if (error) {
-      toast.error("Erro ao cadastrar: " + error.message);
+      toast.error(safeError(error, "Erro ao cadastrar paciente."));
       return;
     }
     toast.success("Paciente cadastrado!");
