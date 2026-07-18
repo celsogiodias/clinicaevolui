@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { safeError } from "@/lib/safe-errors"
 
+
 interface Result {
   narrative: string;
   sessions: { date: string; score: number; note: string }[];
