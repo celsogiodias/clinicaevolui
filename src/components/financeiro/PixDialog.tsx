@@ -8,6 +8,7 @@ import { Copy, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePixPayload } from "@/lib/pix";
 import { supabase } from "@/integrations/supabase/client";
+import { safeError } from "@/lib/safe-errors"
 
 interface Props {
   open: boolean;
@@ -69,7 +70,7 @@ export function PixDialog({ open, onClose, entry, onPaid }: Props) {
       .update({ status: "pago", method: "pix" })
       .eq("id", entry.id);
     setSaving(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) { toast.error(safeError(error, "Erro ao confirmar pagamento.")); return; }
     toast.success("Pagamento confirmado!");
     onPaid();
     onClose();
