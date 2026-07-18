@@ -10,6 +10,7 @@ import { PatientTeamTab } from "@/components/patient/PatientTeamTab";
 import { MedicalRecordsTab } from "@/components/patient/MedicalRecordsTab";
 import { AttachmentsTab } from "@/components/patient/AttachmentsTab";
 import { FinancialTab } from "@/components/patient/FinancialTab";
+import { safeError } from "@/lib/safe-errors"
 
 export const Route = createFileRoute("/_authenticated/patients/$id")({
   component: EditPatient,
@@ -51,7 +52,7 @@ function EditPatient() {
       notes: data.notes || null,
     }).eq("id", id);
     if (error) {
-      toast.error("Erro ao atualizar: " + error.message);
+      toast.error(safeError(error, "Erro ao atualizar paciente."));
       return;
     }
     setPatientName(data.full_name);
