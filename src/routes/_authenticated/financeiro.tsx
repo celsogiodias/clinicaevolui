@@ -217,11 +217,11 @@ function FinanceiroPage() {
 
     if (editing.id) {
       const { error } = await supabase.from("financial_entries").update(payload).eq("id", editing.id);
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(safeError(error, "Erro ao carregar financeiro."));
       toast.success("Lançamento atualizado");
     } else {
       const { error } = await supabase.from("financial_entries").insert({ ...payload, created_by: currentUserId! });
-      if (error) return toast.error(error.message);
+      if (error) return toast.error(safeError(error, "Erro ao carregar financeiro."));
       toast.success("Lançamento criado");
     }
     setDialogOpen(false); setEditing(null); load();
@@ -230,7 +230,7 @@ function FinanceiroPage() {
   const remove = async (id: string) => {
     if (!confirm("Excluir este lançamento?")) return;
     const { error } = await supabase.from("financial_entries").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(safeError(error, "Erro ao carregar financeiro."));
     toast.success("Lançamento excluído"); load();
   };
 
@@ -277,7 +277,7 @@ function FinanceiroPage() {
       return toast.error("Lançamento cancelado não pode ser pago. Altere para pendente primeiro.");
     }
     const { data, error } = await supabase.from("financial_entries").update({ status: s }).eq("id", e.id).select().single();
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(safeError(error, "Erro ao carregar financeiro."));
     toast.success("Status atualizado");
     if (s === "pago" && data) {
       await issueReceipt(data as Entry);
