@@ -8,6 +8,7 @@ import { analyzePatientEvolution } from "@/lib/ai.functions";
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from "recharts";
+import { safeError } from "@/lib/safe-errors"
 
 interface Result {
   narrative: string;
@@ -26,7 +27,7 @@ export function EvolutionAnalysis({ patientId }: { patientId: string }) {
       const r = await call({ data: { patientId } });
       setData(r);
     } catch (e: any) {
-      toast.error(e?.message ?? "Falha na análise");
+      toast.error(safeError(e, "Falha na análise"));
     } finally { setLoading(false); }
   };
 
