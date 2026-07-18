@@ -36,7 +36,7 @@ export function FinancialAdvisor({ summary }: { summary: Summary }) {
       const r = await call({ data: { summary } });
       setData(r);
     } catch (e: any) {
-      toast.error(e?.message ?? "Falha na consulta");
+      toast.error(safeError(e, "Falha na consulta"));
     } finally { setLoading(false); }
   };
 
