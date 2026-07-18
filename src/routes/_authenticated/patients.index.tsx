@@ -9,6 +9,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { safeError } from "@/lib/safe-errors"
 
 export const Route = createFileRoute("/_authenticated/patients/")({
   component: PatientsList,
@@ -34,7 +35,7 @@ function PatientsList() {
     setLoading(true);
     const { data, error } = await supabase
       .from("patients").select("*").order("full_name");
-    if (error) toast.error("Erro ao carregar pacientes");
+    if (error) toast.error(safeError(error, "Erro ao carregar pacientes"));
     setPatients(data ?? []);
     setLoading(false);
   };
@@ -44,7 +45,7 @@ function PatientsList() {
   const handleDelete = async () => {
     if (!deleteId) return;
     const { error } = await supabase.from("patients").delete().eq("id", deleteId);
-    if (error) toast.error("Erro ao excluir paciente");
+    if (error) toast.error(safeError(error, "Erro ao excluir paciente"));
     else {
       toast.success("Paciente excluído");
       setPatients(patients.filter((p) => p.id !== deleteId));
